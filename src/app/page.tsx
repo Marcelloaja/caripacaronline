@@ -6,7 +6,7 @@ import {
   Heart, Sparkles, MessageCircle, User, ShieldCheck,
   Video, MapPin, CheckCircle, Bell, ArrowRight,
   Fingerprint, LogOut, CheckCircle2, Loader2, Mail,
-  Trash2, AlertTriangle
+  Trash2, AlertTriangle, X
 } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import BottomNavigation from '@/components/BottomNavigation';
@@ -16,6 +16,7 @@ import ChatAndVideoRoom from '@/components/ChatAndVideoRoom';
 import OnboardingModal from '@/components/OnboardingModal';
 import ReportModal from '@/components/ReportModal';
 import AuthModal from '@/components/AuthModal';
+import CommunityFeed from '@/components/CommunityFeed';
 import {
   UserProfile, LoveInteraction, Match, AppNotification
 } from '@/types';
@@ -28,7 +29,7 @@ import {
 
 export default function Home() {
   const [mounted, setMounted] = useState(false);
-  const [activeTab, setActiveTab] = useState<'discovery' | 'likes' | 'chats' | 'profile'>('discovery');
+  const [activeTab, setActiveTab] = useState<'discovery' | 'community' | 'likes' | 'chats' | 'profile'>('discovery');
 
   // App Data States
   const [currentUser, setCurrentUser] = useState<UserProfile | null>(null);
@@ -36,6 +37,7 @@ export default function Home() {
   const [interactions, setInteractions] = useState<LoveInteraction[]>([]);
   const [matches, setMatches] = useState<Match[]>([]);
   const [notifications, setNotifications] = useState<AppNotification[]>([]);
+  const [viewingCandidate, setViewingCandidate] = useState<any | null>(null);
 
   // Active Chat State
   const [activeMatch, setActiveMatch] = useState<Match | null>(null);
@@ -270,7 +272,19 @@ export default function Home() {
           />
         )}
 
-        {/* ================= TAB 2: MENYUKAI SAYA ================= */}
+        {/* ================= TAB 2: RUANG CERITA / KOMUNITAS (BARU) ================= */}
+        {activeTab === 'community' && (
+          <CommunityFeed
+            currentUser={currentUser}
+            onViewProfile={(author) => {
+              const fullProfile = candidates.find((c) => c.id === author.id);
+              setViewingCandidate(fullProfile || author);
+            }}
+            onOpenAuth={() => setShowAuthModal(true)}
+          />
+        )}
+
+        {/* ================= TAB 3: MENYUKAI SAYA ================= */}
         {activeTab === 'likes' && (
           <LikesReceivedView
             interactions={interactions}
@@ -642,6 +656,114 @@ export default function Home() {
         }}
         onAuthSuccess={handleAuthSuccess}
       />
+
+      {/* ================= MODAL DETAIL PROFIL DARI RUANG CERITA ================= */}
+      {viewingCandidate && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-200">
+          <div className="relative w-full max-w-sm bg-white rounded-3xl overflow-hidden border border-[#E8E2D8] shadow-2xl">
+            <div className="relative h-64 bg-[#FAF7F2]">
+              {viewingCandidate.photoUrl ? (
+                <img
+                  src={viewingCandidate.photoUrl}
+                  alt={viewingCandidate.name}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center text-4xl text-[#BE3A50] font-bold">
+                  {viewingCandidate.name?.[0]}
+                </div>
+              )}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+
+              <button
+                type="button"
+                onClick={() => setViewingCandidate(null)}
+                className="absolute top-3 right-3 p-1.5 bg-black/50 hover:bg-black/75 text-white rounded-full transition-all"
+                aria-label="Tutup"
+              >
+                <X className="w-4 h-4" />
+              </button>
+
+              <div className="absolute bottom-3 left-4 right-4 text-white">
+                <div className="flex items-center gap-2">
+                  <h3 className="text-xl font-bold">{viewingCandidate.name}</h3>
+                  <span className="text-xs bg-[#15803D] text-white px-2 py-0.5 rounded-full font-bold">
+                    {viewingCandidate.age || 25} thn
+                  </span>
+                </div>
+                <p className="text-xs text-white/80 mt-0.5">
+                  {viewingCandidate.currentCity || 'Indonesia'} • {viewingCandidate.mbti || 'MBTI'}
+                </p>
+              </div>
+            </div>
+
+            <div className="p-4 space-y-3.5">
+              {viewingCandidate.bio && (
+                <div>
+                  <h4 className="text-[11px] font-bold text-[#6B6365] uppercase tracking-wider mb-1">
+                    Tentang
+                  </h4>
+                  <p className="text-xs text-[#1F1A1B] leading-relaxed">
+                    {viewingCandidate.bio}
+                  </p>
+                </div>
+              )}
+
+              {viewingCandidate.hobbies && viewingCandidate.hobbies.length > 0 && (
+                <div>
+                  <h4 className="text-[11px] font-bold text-[#6B6365] uppercase tracking-wider mb-1">
+                    Hobi & Minat
+                  </h4>
+                  <div className="flex flex-wrap gap-1">
+                    {viewingCandidate.hobbies.map((h: string, i: number) => (
+                      <span key={i} className="text-[10px] bg-[#FAF7F2] text-[#6B6365] px-2 py-0.5 rounded-md border border-[#E8E2D8]">
+                        {h}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              <div className="pt-2 flex gap-2">
+                {currentUser?.id === viewingCandidate.id ? (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setViewingCandidate(null);
+                      setActiveTab('profile');
+                    }}
+                    className="w-full py-2.5 bg-[#FAF7F2] border border-[#E8E2D8] text-[#1F1A1B] rounded-xl text-xs font-bold hover:bg-[#F0EBE1] transition-all"
+                  >
+                    Buka Profil Saya
+                  </button>
+                ) : (
+                  <>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const targetId = viewingCandidate.id;
+                        setViewingCandidate(null);
+                        handleSendInteraction(targetId, 'love');
+                      }}
+                      className="flex-1 py-2.5 bg-[#BE3A50] hover:bg-[#A32F42] text-white rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-all shadow-xs"
+                    >
+                      <Heart className="w-3.5 h-3.5 fill-white" />
+                      <span>Kirim Salam & Suka</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setViewingCandidate(null)}
+                      className="px-4 py-2.5 bg-[#FAF7F2] text-[#6B6365] hover:text-[#1F1A1B] rounded-xl text-xs font-semibold"
+                    >
+                      Tutup
+                    </button>
+                  </>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* ================= MODAL KONFIRMASI HAPUS AKUN ================= */}
       {showDeleteAccountModal && (

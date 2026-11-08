@@ -1,12 +1,12 @@
 'use client';
 
 import React from 'react';
-import { Sparkles, Heart, MessageCircle, User } from 'lucide-react';
+import { Sparkles, Heart, MessageCircle, User, BookOpen } from 'lucide-react';
 import { UserProfile } from '@/types';
 
 interface BottomNavigationProps {
-  activeTab: 'discovery' | 'likes' | 'chats' | 'profile';
-  setActiveTab: (tab: 'discovery' | 'likes' | 'chats' | 'profile') => void;
+  activeTab: 'discovery' | 'community' | 'likes' | 'chats' | 'profile';
+  setActiveTab: (tab: 'discovery' | 'community' | 'likes' | 'chats' | 'profile') => void;
   likesCount: number;
   unreadMessagesCount: number;
   currentUser: UserProfile | null;
@@ -34,7 +34,7 @@ export default function BottomNavigation({
       <button
         type="button"
         onClick={() => setActiveTab('discovery')}
-        className={`flex flex-col items-center justify-center min-w-[56px] min-h-[48px] px-2.5 py-1 rounded-2xl transition-all ${
+        className={`flex flex-col items-center justify-center min-w-[50px] min-h-[48px] px-2 py-1 rounded-2xl transition-all ${
           activeTab === 'discovery'
             ? 'bg-[#BE3A50]/10 text-[#BE3A50]'
             : 'text-[#6B6365] hover:text-[#1F1A1B]'
@@ -47,6 +47,26 @@ export default function BottomNavigation({
           }`}
         >
           Cari
+        </span>
+      </button>
+
+      {/* 2. Tab Ruang Cerita Komunitas (Baru) */}
+      <button
+        type="button"
+        onClick={() => setActiveTab('community')}
+        className={`flex flex-col items-center justify-center min-w-[50px] min-h-[48px] px-2 py-1 rounded-2xl transition-all ${
+          activeTab === 'community'
+            ? 'bg-[#BE3A50]/10 text-[#BE3A50]'
+            : 'text-[#6B6365] hover:text-[#1F1A1B]'
+        }`}
+      >
+        <BookOpen className={`w-5 h-5 ${activeTab === 'community' ? 'stroke-[2.5]' : ''}`} />
+        <span
+          className={`text-[10px] mt-0.5 tracking-tight ${
+            activeTab === 'community' ? 'font-bold text-[#BE3A50]' : 'font-medium'
+          }`}
+        >
+          Cerita
         </span>
       </button>
 

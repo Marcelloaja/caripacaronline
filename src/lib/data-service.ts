@@ -1,4 +1,4 @@
-import { UserProfile, LoveInteraction, Match, ChatMessage, AppNotification } from '@/types';
+import { UserProfile, LoveInteraction, Match, ChatMessage, AppNotification, CommunityPost, PostComment } from '@/types';
 import { supabase, isSupabaseConfigured } from './supabase';
 import * as localStore from './storage';
 
@@ -329,6 +329,252 @@ export async function deleteAccount(userId: string): Promise<void> {
   }
 
   localStore.clearUserData();
+}
+
+/**
+ * 7. RUANG CERITA / KOMUNITAS (POSTS, COMMENTS, LIKES & REPLIES)
+ */
+
+export async function fetchCommunityPosts(currentUserId?: string): Promise<CommunityPost[]> {
+  if (isSupabaseConfigured() && supabase) {
+    try {
+      const { data: postsData, error: postsError } = await supabase
+        .from('posts')
+        .select(`
+          id,
+          author_id,
+          content,
+          photo_url,
+          category,
+          likes_count,
+          comments_count,
+          created_at,
+          profiles:author_id (
+            id,
+            name,
+            gender,
+            current_city,
+            age,
+            mbti,
+            photo_url,
+            is_photo_verified
+          )
+        `)
+        .order('created_at', { ascending: false });
+
+      if (postsData && !postsError && postsData.length > 0) {
+        let userLikes: string[] = [];
+        if (currentUserId) {
+          const { data: likesData } = await supabase
+            .from('post_likes')
+            .select('post_id')
+            .eq('user_id', currentUserId);
+          if (likesData) {
+            userLikes = likesData.map(l => l.post_id);
+          }
+        }
+
+        return postsData.map((p: any) => {
+          const author = p.profiles || {};
+          return {
+            id: p.id,
+            authorId: p.author_id,
+            author: {
+              id: author.id || p.author_id,
+              name: author.name || 'Pengguna',
+              photoUrl: author.photo_url || '',
+              gender: author.gender || 'pria',
+              currentCity: author.current_city || 'Indonesia',
+              age: author.age || 25,
+              mbti: author.mbti || 'INFJ',
+              isPhotoVerified: author.is_photo_verified ?? true
+            },
+            content: p.content,
+            photoUrl: p.photo_url,
+            category: p.category || 'cerita',
+            likesCount: p.likes_count || 0,
+            commentsCount: p.comments_count || 0,
+            hasLiked: userLikes.includes(p.id),
+            createdAt: p.created_at
+          };
+        });
+      }
+    } catch (err) {
+      console.error('Gagal mengambil postingan dari Supabase:', err);
+    }
+  }
+
+  // Fallback ke penyimpanan lokal
+  const localPosts = localStore.getLocalCommunityPosts();
+  if (currentUserId) {
+    const likesKey = `cpo_community_likes_${currentUserId}`;
+    try {
+      const raw = localStorage.getItem(likesKey);
+      if (raw) {
+        const likedIds = JSON.parse(raw);
+        return localPosts.map(p => ({
+          ...p,
+          hasLiked: likedIds.includes(p.id)
+        }));
+      }
+    } catch {}
+  }
+  return localPosts;
+}
+
+export async function createCommunityPost(post: CommunityPost): Promise<CommunityPost> {
+  localStore.saveLocalCommunityPost(post);
+
+  if (isSupabaseConfigured() && supabase) {
+    try {
+      await supabase.from('posts').insert({
+        id: post.id,
+        author_id: post.authorId,
+        content: post.content,
+        photo_url: post.photoUrl,
+        category: post.category,
+        likes_count: post.likesCount,
+        comments_count: post.commentsCount,
+        created_at: post.createdAt
+      });
+    } catch (err) {
+      console.error('Gagal menyimpan postingan ke Supabase:', err);
+    }
+  }
+
+  return post;
+}
+
+export async function deleteCommunityPost(postId: string): Promise<void> {
+  localStore.deleteLocalCommunityPost(postId);
+
+  if (isSupabaseConfigured() && supabase) {
+    try {
+      await supabase.from('posts').delete().eq('id', postId);
+    } catch (err) {
+      console.error('Gagal menghapus postingan dari Supabase:', err);
+    }
+  }
+}
+
+export async function fetchPostComments(postId: string): Promise<PostComment[]> {
+  if (isSupabaseConfigured() && supabase) {
+    try {
+      const { data, error } = await supabase
+        .from('post_comments')
+        .select(`
+          id,
+          post_id,
+          parent_comment_id,
+          reply_to_author_name,
+          author_id,
+          content,
+          created_at,
+          profiles:author_id (
+            id,
+            name,
+            gender,
+            current_city,
+            age,
+            photo_url,
+            is_photo_verified
+          )
+        `)
+        .eq('post_id', postId)
+        .order('created_at', { ascending: true });
+
+      if (data && !error && data.length > 0) {
+        return data.map((c: any) => {
+          const author = c.profiles || {};
+          return {
+            id: c.id,
+            postId: c.post_id,
+            parentCommentId: c.parent_comment_id,
+            replyToAuthorName: c.reply_to_author_name,
+            authorId: c.author_id,
+            author: {
+              id: author.id || c.author_id,
+              name: author.name || 'Pengguna',
+              photoUrl: author.photo_url || '',
+              gender: author.gender || 'pria',
+              currentCity: author.current_city || 'Indonesia',
+              age: author.age || 25,
+              isPhotoVerified: author.is_photo_verified ?? true
+            },
+            content: c.content,
+            createdAt: c.created_at
+          };
+        });
+      }
+    } catch (err) {
+      console.error('Gagal mengambil komentar dari Supabase:', err);
+    }
+  }
+
+  return localStore.getLocalPostComments(postId);
+}
+
+export async function createPostComment(comment: PostComment): Promise<PostComment> {
+  localStore.saveLocalPostComment(comment);
+
+  if (isSupabaseConfigured() && supabase) {
+    try {
+      await supabase.from('post_comments').insert({
+        id: comment.id,
+        post_id: comment.postId,
+        parent_comment_id: comment.parentCommentId || null,
+        reply_to_author_name: comment.replyToAuthorName || null,
+        author_id: comment.authorId,
+        content: comment.content,
+        created_at: comment.createdAt
+      });
+
+      // Update counter di posts
+      const { data: post } = await supabase
+        .from('posts')
+        .select('comments_count')
+        .eq('id', comment.postId)
+        .single();
+
+      if (post) {
+        await supabase
+          .from('posts')
+          .update({ comments_count: (post.comments_count || 0) + 1 })
+          .eq('id', comment.postId);
+      }
+    } catch (err) {
+      console.error('Gagal menyimpan komentar ke Supabase:', err);
+    }
+  }
+
+  return comment;
+}
+
+export async function togglePostLike(postId: string, userId: string): Promise<{ isLiked: boolean; count: number }> {
+  const result = localStore.toggleLocalPostLike(postId, userId);
+
+  if (isSupabaseConfigured() && supabase) {
+    try {
+      if (result.isLiked) {
+        await supabase.from('post_likes').insert({
+          id: `like_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
+          post_id: postId,
+          user_id: userId
+        });
+      } else {
+        await supabase.from('post_likes').delete().match({ post_id: postId, user_id: userId });
+      }
+
+      await supabase
+        .from('posts')
+        .update({ likes_count: result.count })
+        .eq('id', postId);
+    } catch (err) {
+      console.error('Gagal mengupdate suka di Supabase:', err);
+    }
+  }
+
+  return result;
 }
 
 // Helper Mappings

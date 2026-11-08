@@ -77,6 +77,47 @@ export interface AppNotification {
   isRead: boolean;
 }
 
+export interface CommunityPost {
+  id: string;
+  authorId: string;
+  author: {
+    id: string;
+    name: string;
+    photoUrl: string;
+    gender: Gender;
+    currentCity: string;
+    age: number;
+    mbti: MBTIType;
+    isPhotoVerified: boolean;
+  };
+  content: string;
+  photoUrl?: string;
+  category: 'cerita' | 'keseharian' | 'tips_kencan' | 'tanya_jawab';
+  likesCount: number;
+  commentsCount: number;
+  hasLiked?: boolean;
+  createdAt: string;
+}
+
+export interface PostComment {
+  id: string;
+  postId: string;
+  parentCommentId?: string; // ID komentar yang dibalas jika reply bersarang
+  replyToAuthorName?: string; // Nama yang dibalas (misal: "Budi")
+  authorId: string;
+  author: {
+    id: string;
+    name: string;
+    photoUrl: string;
+    gender: Gender;
+    currentCity: string;
+    age: number;
+    isPhotoVerified: boolean;
+  };
+  content: string;
+  createdAt: string;
+}
+
 export const INDONESIAN_CITIES = [
   'Jakarta',
   'Surabaya',

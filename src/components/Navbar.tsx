@@ -3,13 +3,13 @@
 import React, { useState } from 'react';
 import {
   Heart, MessageCircle, User, Bell, Wifi, WifiOff, AlertTriangle,
-  Sparkles, LogIn
+  Sparkles, LogIn, BookOpen
 } from 'lucide-react';
 import { AppNotification, UserProfile } from '@/types';
 
 interface NavbarProps {
-  activeTab: 'discovery' | 'likes' | 'chats' | 'profile';
-  setActiveTab: (tab: 'discovery' | 'likes' | 'chats' | 'profile') => void;
+  activeTab: 'discovery' | 'community' | 'likes' | 'chats' | 'profile';
+  setActiveTab: (tab: 'discovery' | 'community' | 'likes' | 'chats' | 'profile') => void;
   currentUser: UserProfile | null;
   likesCount: number;
   unreadMessagesCount: number;
@@ -74,6 +74,18 @@ export default function Navbar({
           >
             <Sparkles className="w-3.5 h-3.5" />
             <span>Cari Pasangan</span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab('community')}
+            className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 whitespace-nowrap ${
+              activeTab === 'community'
+                ? 'bg-white text-[#BE3A50] shadow-sm'
+                : 'text-[#6B6365] hover:text-[#1F1A1B]'
+            }`}
+          >
+            <BookOpen className="w-3.5 h-3.5" />
+            <span>Ruang Cerita</span>
           </button>
 
           <button

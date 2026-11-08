@@ -114,8 +114,65 @@ CREATE POLICY "Allow public insert on messages" ON public.messages FOR INSERT WI
 
 CREATE POLICY "Allow public insert on reports" ON public.reports FOR INSERT WITH CHECK (true);
 
--- Aktifkan Supabase Realtime agar chat & notifikasi Love langsung masuk secara instan
+-- 6. Tabel Postingan Komunitas / Ruang Cerita Publik (Posts)
+CREATE TABLE IF NOT EXISTS public.posts (
+  id TEXT PRIMARY KEY,
+  author_id TEXT NOT NULL REFERENCES public.profiles(id) ON DELETE CASCADE,
+  content TEXT NOT NULL,
+  photo_url TEXT,
+  category TEXT DEFAULT 'cerita' CHECK (category IN ('cerita', 'keseharian', 'tips_kencan', 'tanya_jawab')),
+  likes_count INTEGER DEFAULT 0,
+  comments_count INTEGER DEFAULT 0,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+-- 7. Tabel Komentar Postingan (Post Comments & Replies)
+CREATE TABLE IF NOT EXISTS public.post_comments (
+  id TEXT PRIMARY KEY,
+  post_id TEXT NOT NULL REFERENCES public.posts(id) ON DELETE CASCADE,
+  parent_comment_id TEXT REFERENCES public.post_comments(id) ON DELETE CASCADE,
+  reply_to_author_name TEXT,
+  author_id TEXT NOT NULL REFERENCES public.profiles(id) ON DELETE CASCADE,
+  content TEXT NOT NULL,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+-- 8. Tabel Reaksi Suka Postingan (Post Likes)
+CREATE TABLE IF NOT EXISTS public.post_likes (
+  id TEXT PRIMARY KEY,
+  post_id TEXT NOT NULL REFERENCES public.posts(id) ON DELETE CASCADE,
+  user_id TEXT NOT NULL REFERENCES public.profiles(id) ON DELETE CASCADE,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
+  UNIQUE(post_id, user_id)
+);
+
+-- Indexing tambahan untuk Ruang Cerita
+CREATE INDEX IF NOT EXISTS idx_posts_created_at ON public.posts(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_post_comments_post_id ON public.post_comments(post_id);
+CREATE INDEX IF NOT EXISTS idx_post_likes_post_id ON public.post_likes(post_id);
+
+-- RLS untuk tabel komunitas
+ALTER TABLE public.posts ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.post_comments ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.post_likes ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Allow public read on posts" ON public.posts FOR SELECT USING (true);
+CREATE POLICY "Allow public insert on posts" ON public.posts FOR INSERT WITH CHECK (true);
+CREATE POLICY "Allow public update on posts" ON public.posts FOR UPDATE USING (true);
+CREATE POLICY "Allow public delete on posts" ON public.posts FOR DELETE USING (true);
+
+CREATE POLICY "Allow public read on post_comments" ON public.post_comments FOR SELECT USING (true);
+CREATE POLICY "Allow public insert on post_comments" ON public.post_comments FOR INSERT WITH CHECK (true);
+CREATE POLICY "Allow public delete on post_comments" ON public.post_comments FOR DELETE USING (true);
+
+CREATE POLICY "Allow public read on post_likes" ON public.post_likes FOR SELECT USING (true);
+CREATE POLICY "Allow public insert on post_likes" ON public.post_likes FOR INSERT WITH CHECK (true);
+CREATE POLICY "Allow public delete on post_likes" ON public.post_likes FOR DELETE USING (true);
+
+-- Aktifkan Supabase Realtime agar chat, notifikasi Love, dan Ruang Cerita langsung terupdate seketika
 ALTER PUBLICATION supabase_realtime ADD TABLE public.messages;
 ALTER PUBLICATION supabase_realtime ADD TABLE public.interactions;
 ALTER PUBLICATION supabase_realtime ADD TABLE public.matches;
+ALTER PUBLICATION supabase_realtime ADD TABLE public.posts;
+ALTER PUBLICATION supabase_realtime ADD TABLE public.post_comments;
 
