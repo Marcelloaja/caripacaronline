@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import confetti from 'canvas-confetti';
 import {
   Heart, Sparkles, MessageCircle, User, ShieldCheck,
-  Video, MapPin, CheckCircle, Bell, ArrowRight, Settings
+  Video, MapPin, CheckCircle, Bell, ArrowRight
 } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import DiscoveryDeck from '@/components/DiscoveryDeck';
@@ -12,7 +12,6 @@ import LikesReceivedView from '@/components/LikesReceivedView';
 import ChatAndVideoRoom from '@/components/ChatAndVideoRoom';
 import OnboardingModal from '@/components/OnboardingModal';
 import ReportModal from '@/components/ReportModal';
-import SettingsAndAdminModal from '@/components/SettingsAndAdminModal';
 import {
   UserProfile, LoveInteraction, Match, AppNotification
 } from '@/types';
@@ -35,7 +34,6 @@ export default function Home() {
 
   // Modals
   const [showOnboarding, setShowOnboarding] = useState(false);
-  const [showSettings, setShowSettings] = useState(false);
   const [reportedUser, setReportedUser] = useState<UserProfile | null>(null);
   const [matchedCelebrationUser, setMatchedCelebrationUser] = useState<UserProfile | null>(null);
 
@@ -150,7 +148,6 @@ export default function Home() {
           setNotifications(getNotifications());
         }}
         networkStatus={networkStatus}
-        onOpenSettings={() => setShowSettings(true)}
         onOpenOnboarding={() => setShowOnboarding(true)}
       />
 
@@ -422,20 +419,6 @@ export default function Home() {
         onClose={() => setReportedUser(null)}
         targetUser={reportedUser}
         reporterId={currentUser?.id}
-      />
-
-      {/* Settings / API Key / Simulation Modal */}
-      <SettingsAndAdminModal
-        isOpen={showSettings}
-        onClose={() => setShowSettings(false)}
-        currentUser={currentUser}
-        onUserChanged={(u) => {
-          setCurrentUser(u);
-          dataService.fetchMatches(u.id).then(setMatches);
-          dataService.fetchInteractions(u.id).then(setInteractions);
-        }}
-        networkStatus={networkStatus}
-        setNetworkStatus={setNetworkStatus}
       />
     </div>
   );

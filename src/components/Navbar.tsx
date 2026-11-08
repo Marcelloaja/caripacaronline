@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Heart, MessageCircle, User, Bell, Wifi, WifiOff, AlertTriangle, Sparkles, SlidersHorizontal, CheckCircle2 } from 'lucide-react';
+import { Heart, MessageCircle, User, Bell, Wifi, WifiOff, AlertTriangle, Sparkles, CheckCircle2 } from 'lucide-react';
 import { AppNotification, UserProfile } from '@/types';
 
 interface NavbarProps {
@@ -13,7 +13,6 @@ interface NavbarProps {
   notifications: AppNotification[];
   onMarkNotificationsRead: () => void;
   networkStatus: 'online' | 'slow' | 'offline';
-  onOpenSettings: () => void;
   onOpenOnboarding: () => void;
 }
 
@@ -26,7 +25,6 @@ export default function Navbar({
   notifications,
   onMarkNotificationsRead,
   networkStatus,
-  onOpenSettings,
   onOpenOnboarding
 }: NavbarProps) {
   const [showNotifDropdown, setShowNotifDropdown] = useState(false);
@@ -210,16 +208,6 @@ export default function Navbar({
               </div>
             )}
           </div>
-
-          {/* Settings / API Key Button */}
-          <button
-            onClick={onOpenSettings}
-            className="w-9 h-9 rounded-xl border border-[#E8E2D8] bg-white flex items-center justify-center text-[#6B6365] hover:text-[#1F1A1B] hover:bg-[#F0EBE1] transition-all"
-            title="Pengaturan AI Gemini & Data Demo"
-            aria-label="Pengaturan"
-          >
-            <SlidersHorizontal className="w-4 h-4" />
-          </button>
         </div>
       </div>
 
