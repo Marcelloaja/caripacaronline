@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import {
   Heart, MessageCircle, User, Bell, Wifi, WifiOff, AlertTriangle,
-  Sparkles, CheckCircle2, LogIn, LogOut
+  Sparkles, LogIn
 } from 'lucide-react';
 import { AppNotification, UserProfile } from '@/types';
 
@@ -30,56 +30,63 @@ export default function Navbar({
   notifications,
   onMarkNotificationsRead,
   networkStatus,
-  onOpenOnboarding,
-  onOpenAuth,
-  onSignOut
+  onOpenAuth
 }: NavbarProps) {
   const [showNotifDropdown, setShowNotifDropdown] = useState(false);
-  const unreadNotifs = notifications.filter(n => !n.isRead).length;
+  const unreadNotifs = notifications.filter((n) => !n.isRead).length;
 
   return (
     <header className="sticky top-0 z-40 bg-[#FAF7F2]/95 backdrop-blur-md border-b border-[#E8E2D8]">
-      <div className="max-w-5xl mx-auto px-4 h-16 flex items-center justify-between">
-        {/* Brand */}
-        <div className="flex items-center gap-3 cursor-pointer" onClick={() => setActiveTab('discovery')}>
-          <div className="w-10 h-10 rounded-2xl bg-[#BE3A50] flex items-center justify-center text-white shadow-sm shadow-[#BE3A50]/20">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-3">
+        {/* ================= 1. BRAND LOGO & TAGLINE ================= */}
+        <div
+          className="flex items-center gap-3 cursor-pointer select-none shrink-0"
+          onClick={() => setActiveTab('discovery')}
+        >
+          <div className="w-10 h-10 rounded-2xl bg-[#BE3A50] flex items-center justify-center text-white shadow-sm shadow-[#BE3A50]/20 shrink-0">
             <Heart className="w-5 h-5 fill-white stroke-white" />
           </div>
-          <div>
-            <div className="flex items-center gap-1.5">
-              <span className="font-bold text-lg tracking-tight text-[#1F1A1B]">CariPacar</span>
-              <span className="text-xs px-2 py-0.5 rounded-full bg-[#15803D]/10 text-[#15803D] font-medium border border-[#15803D]/20">
+          <div className="min-w-0">
+            <div className="flex items-center gap-2">
+              <span className="font-bold text-lg tracking-tight text-[#1F1A1B] leading-none">
+                CariPacar
+              </span>
+              <span className="text-[11px] px-2 py-0.5 rounded-full bg-[#15803D]/10 text-[#15803D] font-semibold border border-[#15803D]/20 leading-tight shrink-0">
                 Lajang & Asli
               </span>
             </div>
-            <p className="text-[11px] text-[#6B6365] hidden sm:block">Komitmen Serius Menuju Masa Depan</p>
+            <p className="text-[11px] text-[#6B6365] mt-0.5 hidden xl:block whitespace-nowrap">
+              Komitmen Serius Menuju Masa Depan
+            </p>
           </div>
         </div>
 
-        {/* Navigation Tabs (Desktop & Tablet) */}
-        <nav className="hidden md:flex items-center gap-1 bg-[#F0EBE1] p-1 rounded-2xl border border-[#E8E2D8]">
+        {/* ================= 2. DESKTOP NAVIGATION TABS ================= */}
+        <nav className="hidden md:flex items-center gap-1 bg-[#F0EBE1] p-1 rounded-2xl border border-[#E8E2D8] shrink-0">
+          {/* Tab: Cari Pasangan */}
           <button
             onClick={() => setActiveTab('discovery')}
-            className={`px-4 py-2 rounded-xl text-xs font-semibold transition-all flex items-center gap-2 ${
+            className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 whitespace-nowrap ${
               activeTab === 'discovery'
                 ? 'bg-white text-[#BE3A50] shadow-sm'
                 : 'text-[#6B6365] hover:text-[#1F1A1B]'
             }`}
           >
             <Sparkles className="w-3.5 h-3.5" />
-            Cari Pasangan
+            <span>Cari Pasangan</span>
           </button>
 
+          {/* Tab: Menyukai Saya */}
           <button
             onClick={() => setActiveTab('likes')}
-            className={`px-4 py-2 rounded-xl text-xs font-semibold transition-all flex items-center gap-2 relative ${
+            className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 whitespace-nowrap relative ${
               activeTab === 'likes'
                 ? 'bg-white text-[#BE3A50] shadow-sm'
                 : 'text-[#6B6365] hover:text-[#1F1A1B]'
             }`}
           >
             <Heart className="w-3.5 h-3.5" />
-            Menyukai Saya
+            <span>Menyukai Saya</span>
             {likesCount > 0 && (
               <span className="px-1.5 py-0.2 rounded-full bg-[#BE3A50] text-white text-[10px] font-bold">
                 {likesCount}
@@ -87,37 +94,39 @@ export default function Navbar({
             )}
           </button>
 
+          {/* Tab: Pesan & Kencan */}
           <button
             onClick={() => setActiveTab('chats')}
-            className={`px-4 py-2 rounded-xl text-xs font-semibold transition-all flex items-center gap-2 relative ${
+            className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 whitespace-nowrap relative ${
               activeTab === 'chats'
                 ? 'bg-white text-[#BE3A50] shadow-sm'
                 : 'text-[#6B6365] hover:text-[#1F1A1B]'
             }`}
           >
             <MessageCircle className="w-3.5 h-3.5" />
-            Pesan & Kencan
+            <span>Pesan & Kencan</span>
             {unreadMessagesCount > 0 && (
               <span className="w-2 h-2 rounded-full bg-[#BE3A50]" />
             )}
           </button>
 
+          {/* Tab: Profil Saya (Khusus layar lebar, atau dapat diakses via foto profil) */}
           <button
             onClick={() => setActiveTab('profile')}
-            className={`px-4 py-2 rounded-xl text-xs font-semibold transition-all flex items-center gap-2 ${
+            className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 whitespace-nowrap ${
               activeTab === 'profile'
                 ? 'bg-white text-[#BE3A50] shadow-sm'
                 : 'text-[#6B6365] hover:text-[#1F1A1B]'
             }`}
           >
             <User className="w-3.5 h-3.5" />
-            Profil Saya
+            <span>Profil Saya</span>
           </button>
         </nav>
 
-        {/* Right Section: Status Jaringan, Notifikasi, Settings */}
-        <div className="flex items-center gap-2">
-          {/* Indikator Sinyal / Jaringan */}
+        {/* ================= 3. RIGHT SECTION (STATUS, NOTIF, USER) ================= */}
+        <div className="flex items-center gap-2 shrink-0">
+          {/* Indikator Status Sinyal / Jaringan */}
           <div
             title={`Status Jaringan: ${
               networkStatus === 'online'
@@ -126,7 +135,7 @@ export default function Navbar({
                 ? 'Jaringan Tidak Stabil'
                 : 'Terputus / Offline'
             }`}
-            className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border ${
+            className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border whitespace-nowrap ${
               networkStatus === 'online'
                 ? 'bg-[#DCFCE7] text-[#15803D] border-[#15803D]/20'
                 : networkStatus === 'slow'
@@ -151,7 +160,7 @@ export default function Navbar({
                   onMarkNotificationsRead();
                 }
               }}
-              className="w-9 h-9 rounded-xl border border-[#E8E2D8] bg-white flex items-center justify-center text-[#1F1A1B] hover:bg-[#F0EBE1] transition-all relative"
+              className="w-9 h-9 rounded-xl border border-[#E8E2D8] bg-white flex items-center justify-center text-[#1F1A1B] hover:bg-[#F0EBE1] transition-all relative shrink-0"
               aria-label="Notifikasi"
             >
               <Bell className="w-4 h-4" />
@@ -190,7 +199,7 @@ export default function Navbar({
                         <img
                           src={notif.fromUser.photoUrl}
                           alt={notif.fromUser.name}
-                          className="w-10 h-10 rounded-full object-cover border border-[#E8E2D8]"
+                          className="w-10 h-10 rounded-full object-cover border border-[#E8E2D8] shrink-0"
                         />
                         <div className="flex-1 min-w-0">
                           <p className="text-xs font-semibold text-[#1F1A1B]">
@@ -216,28 +225,30 @@ export default function Navbar({
             )}
           </div>
 
-          {/* User Auth Action Button */}
+          {/* User Profile Pill / Login Button */}
           {currentUser ? (
-            <div className="flex items-center gap-1.5 pl-1">
-              <button
-                onClick={() => setActiveTab('profile')}
-                className="flex items-center gap-2 p-1 pr-2.5 rounded-full border border-[#E8E2D8] bg-white hover:bg-[#F0EBE1] transition-all"
-                title={`Profil ${currentUser.name}`}
-              >
-                <img
-                  src={currentUser.photoUrl}
-                  alt={currentUser.name}
-                  className="w-7 h-7 rounded-full object-cover border border-[#BE3A50]/30"
-                />
-                <span className="text-xs font-semibold text-[#1F1A1B] hidden lg:inline max-w-[80px] truncate">
-                  {currentUser.name}
-                </span>
-              </button>
-            </div>
+            <button
+              onClick={() => setActiveTab('profile')}
+              className={`flex items-center gap-2 pl-1 pr-3 py-1 rounded-full border transition-all shrink-0 ${
+                activeTab === 'profile'
+                  ? 'bg-white border-[#BE3A50] ring-2 ring-[#BE3A50]/20 shadow-sm'
+                  : 'bg-white border-[#E8E2D8] hover:bg-[#F0EBE1]'
+              }`}
+              title={`Buka profil ${currentUser.name}`}
+            >
+              <img
+                src={currentUser.photoUrl}
+                alt={currentUser.name}
+                className="w-7 h-7 rounded-full object-cover border border-[#BE3A50]/30 shrink-0"
+              />
+              <span className="text-xs font-semibold text-[#1F1A1B] whitespace-nowrap max-w-[110px] truncate hidden sm:inline">
+                {currentUser.name}
+              </span>
+            </button>
           ) : (
             <button
               onClick={onOpenAuth}
-              className="px-3 py-1.5 rounded-xl bg-[#BE3A50] hover:bg-[#a32f42] text-white text-xs font-bold transition-all flex items-center gap-1.5 shadow-sm"
+              className="px-3.5 py-1.5 rounded-xl bg-[#BE3A50] hover:bg-[#a32f42] text-white text-xs font-bold transition-all flex items-center gap-1.5 shadow-sm whitespace-nowrap shrink-0"
             >
               <LogIn className="w-3.5 h-3.5" />
               <span>Masuk / Daftar</span>
@@ -246,12 +257,12 @@ export default function Navbar({
         </div>
       </div>
 
-      {/* Mobile Bottom Navigation Bar */}
+      {/* ================= 4. MOBILE BOTTOM NAVIGATION BAR ================= */}
       <div className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-[#FAF7F2]/95 backdrop-blur-md border-t border-[#E8E2D8] px-4 py-2 flex items-center justify-around">
         <button
           onClick={() => setActiveTab('discovery')}
-          className={`flex flex-col items-center gap-1 text-[10px] font-medium py-1 px-3 rounded-xl ${
-            activeTab === 'discovery' ? 'text-[#BE3A50]' : 'text-[#6B6365]'
+          className={`flex flex-col items-center gap-1 text-[10px] font-medium py-1 px-3 rounded-xl transition-all ${
+            activeTab === 'discovery' ? 'text-[#BE3A50] font-bold' : 'text-[#6B6365]'
           }`}
         >
           <Sparkles className="w-5 h-5" />
@@ -260,14 +271,14 @@ export default function Navbar({
 
         <button
           onClick={() => setActiveTab('likes')}
-          className={`flex flex-col items-center gap-1 text-[10px] font-medium py-1 px-3 rounded-xl relative ${
-            activeTab === 'likes' ? 'text-[#BE3A50]' : 'text-[#6B6365]'
+          className={`flex flex-col items-center gap-1 text-[10px] font-medium py-1 px-3 rounded-xl relative transition-all ${
+            activeTab === 'likes' ? 'text-[#BE3A50] font-bold' : 'text-[#6B6365]'
           }`}
         >
           <Heart className="w-5 h-5" />
           <span>Disukai</span>
           {likesCount > 0 && (
-            <span className="absolute top-0 right-2 px-1 rounded-full bg-[#BE3A50] text-white text-[9px] font-bold">
+            <span className="absolute top-0 right-2 px-1.5 rounded-full bg-[#BE3A50] text-white text-[9px] font-bold">
               {likesCount}
             </span>
           )}
@@ -275,8 +286,8 @@ export default function Navbar({
 
         <button
           onClick={() => setActiveTab('chats')}
-          className={`flex flex-col items-center gap-1 text-[10px] font-medium py-1 px-3 rounded-xl relative ${
-            activeTab === 'chats' ? 'text-[#BE3A50]' : 'text-[#6B6365]'
+          className={`flex flex-col items-center gap-1 text-[10px] font-medium py-1 px-3 rounded-xl relative transition-all ${
+            activeTab === 'chats' ? 'text-[#BE3A50] font-bold' : 'text-[#6B6365]'
           }`}
         >
           <MessageCircle className="w-5 h-5" />
@@ -288,8 +299,8 @@ export default function Navbar({
 
         <button
           onClick={() => setActiveTab('profile')}
-          className={`flex flex-col items-center gap-1 text-[10px] font-medium py-1 px-3 rounded-xl ${
-            activeTab === 'profile' ? 'text-[#BE3A50]' : 'text-[#6B6365]'
+          className={`flex flex-col items-center gap-1 text-[10px] font-medium py-1 px-3 rounded-xl transition-all ${
+            activeTab === 'profile' ? 'text-[#BE3A50] font-bold' : 'text-[#6B6365]'
           }`}
         >
           <User className="w-5 h-5" />
@@ -299,4 +310,3 @@ export default function Navbar({
     </header>
   );
 }
-
