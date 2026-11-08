@@ -210,3 +210,4 @@ function base64ToBuffer(base64: string): ArrayBuffer {
   }
   return bytes.buffer;
 }
+
