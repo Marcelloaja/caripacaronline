@@ -28,13 +28,13 @@ export default function BottomNavigation({
   return (
     <nav
       aria-label="Navigasi Bawah Ponsel"
-      className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-[#FAF7F2]/95 backdrop-blur-lg border-t border-[#E8E2D8] px-3 py-1.5 pb-[max(0.6rem,env(safe-area-inset-bottom))] shadow-[0_-4px_24px_rgba(0,0,0,0.06)] flex items-center justify-around"
+      className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-[#FAF7F2]/95 backdrop-blur-lg border-t border-[#E8E2D8] px-2 py-1 pb-[max(0.6rem,env(safe-area-inset-bottom))] shadow-[0_-4px_24px_rgba(0,0,0,0.06)] flex items-center justify-around"
     >
       {/* 1. Tab Cari Pasangan */}
       <button
         type="button"
         onClick={() => setActiveTab('discovery')}
-        className={`flex flex-col items-center justify-center min-w-[50px] min-h-[48px] px-2 py-1 rounded-2xl transition-all ${
+        className={`flex flex-col items-center justify-center flex-1 min-w-0 max-w-[72px] min-h-[46px] px-1 py-1 rounded-2xl transition-all ${
           activeTab === 'discovery'
             ? 'bg-[#BE3A50]/10 text-[#BE3A50]'
             : 'text-[#6B6365] hover:text-[#1F1A1B]'
@@ -42,7 +42,7 @@ export default function BottomNavigation({
       >
         <Sparkles className={`w-5 h-5 ${activeTab === 'discovery' ? 'stroke-[2.5]' : ''}`} />
         <span
-          className={`text-[10px] mt-0.5 tracking-tight ${
+          className={`text-[10px] mt-0.5 tracking-tight truncate ${
             activeTab === 'discovery' ? 'font-bold text-[#BE3A50]' : 'font-medium'
           }`}
         >
@@ -54,7 +54,7 @@ export default function BottomNavigation({
       <button
         type="button"
         onClick={() => setActiveTab('community')}
-        className={`flex flex-col items-center justify-center min-w-[50px] min-h-[48px] px-2 py-1 rounded-2xl transition-all ${
+        className={`flex flex-col items-center justify-center flex-1 min-w-0 max-w-[72px] min-h-[46px] px-1 py-1 rounded-2xl transition-all ${
           activeTab === 'community'
             ? 'bg-[#BE3A50]/10 text-[#BE3A50]'
             : 'text-[#6B6365] hover:text-[#1F1A1B]'
@@ -62,7 +62,7 @@ export default function BottomNavigation({
       >
         <BookOpen className={`w-5 h-5 ${activeTab === 'community' ? 'stroke-[2.5]' : ''}`} />
         <span
-          className={`text-[10px] mt-0.5 tracking-tight ${
+          className={`text-[10px] mt-0.5 tracking-tight truncate ${
             activeTab === 'community' ? 'font-bold text-[#BE3A50]' : 'font-medium'
           }`}
         >
@@ -70,11 +70,11 @@ export default function BottomNavigation({
         </span>
       </button>
 
-      {/* 2. Tab Menyukai Saya */}
+      {/* 3. Tab Menyukai Saya */}
       <button
         type="button"
         onClick={() => setActiveTab('likes')}
-        className={`flex flex-col items-center justify-center min-w-[56px] min-h-[48px] px-2.5 py-1 rounded-2xl relative transition-all ${
+        className={`flex flex-col items-center justify-center flex-1 min-w-0 max-w-[72px] min-h-[46px] px-1 py-1 rounded-2xl relative transition-all ${
           activeTab === 'likes'
             ? 'bg-[#BE3A50]/10 text-[#BE3A50]'
             : 'text-[#6B6365] hover:text-[#1F1A1B]'
@@ -89,7 +89,7 @@ export default function BottomNavigation({
           )}
         </div>
         <span
-          className={`text-[10px] mt-0.5 tracking-tight ${
+          className={`text-[10px] mt-0.5 tracking-tight truncate ${
             activeTab === 'likes' ? 'font-bold text-[#BE3A50]' : 'font-medium'
           }`}
         >
@@ -97,11 +97,11 @@ export default function BottomNavigation({
         </span>
       </button>
 
-      {/* 3. Tab Pesan & Kencan */}
+      {/* 4. Tab Pesan & Kencan */}
       <button
         type="button"
         onClick={() => setActiveTab('chats')}
-        className={`flex flex-col items-center justify-center min-w-[56px] min-h-[48px] px-2.5 py-1 rounded-2xl relative transition-all ${
+        className={`flex flex-col items-center justify-center flex-1 min-w-0 max-w-[72px] min-h-[46px] px-1 py-1 rounded-2xl relative transition-all ${
           activeTab === 'chats'
             ? 'bg-[#BE3A50]/10 text-[#BE3A50]'
             : 'text-[#6B6365] hover:text-[#1F1A1B]'
@@ -114,7 +114,7 @@ export default function BottomNavigation({
           )}
         </div>
         <span
-          className={`text-[10px] mt-0.5 tracking-tight ${
+          className={`text-[10px] mt-0.5 tracking-tight truncate ${
             activeTab === 'chats' ? 'font-bold text-[#BE3A50]' : 'font-medium'
           }`}
         >
@@ -122,7 +122,7 @@ export default function BottomNavigation({
         </span>
       </button>
 
-      {/* 4. Tab Profil Saya / Masuk */}
+      {/* 5. Tab Profil Saya / Masuk */}
       <button
         type="button"
         onClick={() => {
@@ -132,7 +132,7 @@ export default function BottomNavigation({
             onOpenAuth();
           }
         }}
-        className={`flex flex-col items-center justify-center min-w-[56px] min-h-[48px] px-2.5 py-1 rounded-2xl transition-all ${
+        className={`flex flex-col items-center justify-center flex-1 min-w-0 max-w-[72px] min-h-[46px] px-1 py-1 rounded-2xl transition-all ${
           activeTab === 'profile'
             ? 'bg-[#BE3A50]/10 text-[#BE3A50]'
             : 'text-[#6B6365] hover:text-[#1F1A1B]'
@@ -156,7 +156,7 @@ export default function BottomNavigation({
           <User className={`w-5 h-5 ${activeTab === 'profile' ? 'stroke-[2.5]' : ''}`} />
         )}
         <span
-          className={`text-[10px] mt-0.5 tracking-tight ${
+          className={`text-[10px] mt-0.5 tracking-tight truncate ${
             activeTab === 'profile' ? 'font-bold text-[#BE3A50]' : 'font-medium'
           }`}
         >

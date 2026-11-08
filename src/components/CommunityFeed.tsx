@@ -290,15 +290,15 @@ export default function CommunityFeed({
   };
 
   return (
-    <div className="w-full max-w-2xl mx-auto px-4 py-6 space-y-6">
+    <div className="w-full max-w-2xl mx-auto px-3 sm:px-4 py-4 sm:py-6 space-y-4 sm:space-y-6">
       {/* Header Banner Komunitas */}
-      <div className="bg-gradient-to-r from-[#BE3A50] to-[#962638] rounded-2xl p-5 text-white shadow-sm flex items-center justify-between">
-        <div>
-          <span className="inline-block bg-white/20 backdrop-blur-xs text-xs font-semibold px-2.5 py-0.5 rounded-full mb-1">
+      <div className="bg-gradient-to-r from-[#BE3A50] to-[#962638] rounded-2xl p-4 sm:p-5 text-white shadow-sm flex items-center justify-between gap-3">
+        <div className="min-w-0">
+          <span className="inline-block bg-white/20 backdrop-blur-xs text-[11px] sm:text-xs font-semibold px-2.5 py-0.5 rounded-full mb-1">
             Ruang Cerita & Momen
           </span>
-          <h1 className="text-xl font-bold tracking-tight">Kanal Komunitas Lajang</h1>
-          <p className="text-sm text-white/85 mt-0.5">
+          <h1 className="text-lg sm:text-xl font-bold tracking-tight">Kanal Komunitas Lajang</h1>
+          <p className="text-xs sm:text-sm text-white/85 mt-0.5 line-clamp-2">
             Berbagi cerita keseharian, sudut pandang, dan mengobrol santai secara terbuka.
           </p>
         </div>
@@ -306,17 +306,17 @@ export default function CommunityFeed({
           onClick={loadPosts}
           disabled={isLoading}
           aria-label="Segarkan postingan"
-          className="p-2.5 bg-white/15 hover:bg-white/25 active:scale-95 transition-all rounded-full text-white"
+          className="p-2 sm:p-2.5 bg-white/15 hover:bg-white/25 active:scale-95 transition-all rounded-full text-white shrink-0"
           title="Segarkan feed"
         >
-          <RefreshCw className={`w-5 h-5 ${isLoading ? 'animate-spin' : ''}`} />
+          <RefreshCw className={`w-4 h-4 sm:w-5 sm:h-5 ${isLoading ? 'animate-spin' : ''}`} />
         </button>
       </div>
 
       {/* Kotak Buat Cerita Baru (Composer) */}
-      <div className="bg-white rounded-2xl border border-[#E8E2D8] p-4 shadow-xs">
-        <div className="flex gap-3">
-          <div className="w-10 h-10 rounded-full overflow-hidden bg-[#FAF7F2] shrink-0 border border-[#E8E2D8]">
+      <div className="bg-white rounded-2xl border border-[#E8E2D8] p-3.5 sm:p-4 shadow-xs">
+        <div className="flex gap-2.5 sm:gap-3">
+          <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full overflow-hidden bg-[#FAF7F2] shrink-0 border border-[#E8E2D8]">
             {currentUser?.photoUrl ? (
               <img
                 src={currentUser.photoUrl}
@@ -324,13 +324,13 @@ export default function CommunityFeed({
                 className="w-full h-full object-cover"
               />
             ) : (
-              <div className="w-full h-full flex items-center justify-center text-[#BE3A50] font-bold text-sm">
+              <div className="w-full h-full flex items-center justify-center text-[#BE3A50] font-bold text-xs sm:text-sm">
                 {currentUser?.name?.[0] || 'CP'}
               </div>
             )}
           </div>
 
-          <div className="flex-1">
+          <div className="flex-1 min-w-0">
             <textarea
               value={content}
               onChange={(e) => setContent(e.target.value)}
@@ -341,7 +341,7 @@ export default function CommunityFeed({
                   : 'Masuk untuk berbagi cerita dengan teman-teman lajang...'
               }
               rows={isComposerFocused || content ? 3 : 2}
-              className="w-full text-sm text-[#1F1A1B] placeholder-[#6B6365] bg-transparent border-0 resize-none focus:outline-hidden focus:ring-0"
+              className="w-full text-xs sm:text-sm text-[#1F1A1B] placeholder-[#6B6365] bg-transparent border-0 resize-none focus:outline-hidden focus:ring-0 leading-relaxed"
             />
 
             {/* Preview Foto yang diunggah */}
@@ -365,7 +365,7 @@ export default function CommunityFeed({
 
             {/* Pilihan Kategori Postingan (Saat Terbuka) */}
             {isComposerFocused && (
-              <div className="flex flex-wrap gap-1.5 pt-2 border-t border-[#F0EBE1] mb-3">
+              <div className="flex flex-wrap gap-1.5 pt-2 border-t border-[#F0EBE1] mb-2.5">
                 {[
                   { id: 'cerita', label: '📖 Cerita' },
                   { id: 'keseharian', label: '☕ Keseharian' },
@@ -376,7 +376,7 @@ export default function CommunityFeed({
                     key={c.id}
                     type="button"
                     onClick={() => setCategory(c.id as any)}
-                    className={`px-3 py-1 rounded-full text-xs font-medium transition-all ${
+                    className={`px-2.5 sm:px-3 py-1 rounded-full text-[11px] sm:text-xs font-medium transition-all ${
                       category === c.id
                         ? 'bg-[#BE3A50] text-white shadow-xs'
                         : 'bg-[#FAF7F2] text-[#6B6365] hover:bg-[#F3ECE0]'
@@ -397,13 +397,13 @@ export default function CommunityFeed({
             )}
 
             {/* Baris Tombol Aksi Media & Submit */}
-            <div className="flex items-center justify-between pt-2 border-t border-[#F0EBE1]">
-              <div className="flex items-center gap-1">
+            <div className="flex items-center justify-between pt-2.5 border-t border-[#F0EBE1] gap-2">
+              <div className="flex items-center gap-1 sm:gap-1.5 min-w-0">
                 {/* Tombol Unggah Foto */}
                 <button
                   type="button"
                   onClick={() => fileInputRef.current?.click()}
-                  className="p-2 text-[#6B6365] hover:text-[#BE3A50] hover:bg-[#FAF7F2] rounded-lg transition-colors flex items-center gap-1.5 text-xs font-medium"
+                  className="p-1.5 sm:p-2 text-[#6B6365] hover:text-[#BE3A50] hover:bg-[#FAF7F2] rounded-lg transition-colors flex items-center gap-1 text-xs font-medium shrink-0"
                   title="Lampirkan foto"
                 >
                   <ImageIcon className="w-4 h-4 text-[#15803d]" />
@@ -421,7 +421,7 @@ export default function CommunityFeed({
                 <button
                   type="button"
                   onClick={() => cameraInputRef.current?.click()}
-                  className="p-2 text-[#6B6365] hover:text-[#BE3A50] hover:bg-[#FAF7F2] rounded-lg transition-colors flex items-center gap-1.5 text-xs font-medium"
+                  className="p-1.5 sm:p-2 text-[#6B6365] hover:text-[#BE3A50] hover:bg-[#FAF7F2] rounded-lg transition-colors flex items-center gap-1 text-xs font-medium shrink-0"
                   title="Ambil foto kamera"
                 >
                   <Camera className="w-4 h-4 text-[#b45309]" />
@@ -436,8 +436,9 @@ export default function CommunityFeed({
                   className="hidden"
                 />
 
-                <span className="text-[11px] text-[#8C8385] pl-2 flex items-center gap-1">
-                  <ShieldCheck className="w-3 h-3 text-[#15803d]" /> Anti-SARA
+                <span className="text-[11px] text-[#8C8385] pl-1 flex items-center gap-1 whitespace-nowrap shrink-0">
+                  <ShieldCheck className="w-3.5 h-3.5 text-[#15803d] shrink-0" />
+                  <span className="hidden xs:inline sm:inline">Anti-SARA</span>
                 </span>
               </div>
 
@@ -445,17 +446,18 @@ export default function CommunityFeed({
                 type="button"
                 onClick={handleCreatePost}
                 disabled={isSubmitting || (!content.trim() && !photoPreview)}
-                className="px-4 py-1.5 bg-[#BE3A50] hover:bg-[#A32F42] active:scale-95 disabled:opacity-50 text-white rounded-full text-xs font-semibold flex items-center gap-1.5 transition-all shadow-xs"
+                className="px-3.5 sm:px-4 py-1.5 bg-[#BE3A50] hover:bg-[#A32F42] active:scale-95 disabled:opacity-50 text-white rounded-full text-xs font-semibold flex items-center gap-1.5 transition-all shadow-xs whitespace-nowrap shrink-0"
               >
                 {isSubmitting ? (
                   <>
-                    <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                    <RefreshCw className="w-3.5 h-3.5 animate-spin shrink-0" />
                     <span>Mengirim...</span>
                   </>
                 ) : (
                   <>
-                    <Send className="w-3.5 h-3.5" />
-                    <span>Bagikan Cerita</span>
+                    <Send className="w-3.5 h-3.5 shrink-0" />
+                    <span>Bagikan</span>
+                    <span className="hidden sm:inline">Cerita</span>
                   </>
                 )}
               </button>
@@ -488,17 +490,17 @@ export default function CommunityFeed({
             return (
               <article
                 key={post.id}
-                className="bg-white rounded-2xl border border-[#E8E2D8] p-4 sm:p-5 shadow-xs space-y-3 transition-shadow hover:shadow-sm"
+                className="bg-white rounded-2xl border border-[#E8E2D8] p-3.5 sm:p-5 shadow-xs space-y-3 transition-shadow hover:shadow-sm"
               >
                 {/* Header Penulis Postingan */}
-                <div className="flex items-start justify-between gap-3">
+                <div className="flex items-start justify-between gap-2 sm:gap-3">
                   <div
                     onClick={() => onViewProfile(post.author)}
-                    className="flex items-center gap-3 cursor-pointer group"
+                    className="flex items-center gap-2.5 sm:gap-3 cursor-pointer group min-w-0"
                     role="button"
                     tabIndex={0}
                   >
-                    <div className="w-11 h-11 rounded-full overflow-hidden bg-[#FAF7F2] border-2 border-[#15803d]/30 shrink-0 group-hover:border-[#BE3A50] transition-colors">
+                    <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-full overflow-hidden bg-[#FAF7F2] border-2 border-[#15803d]/30 shrink-0 group-hover:border-[#BE3A50] transition-colors">
                       {post.author.photoUrl ? (
                         <img
                           src={post.author.photoUrl}
@@ -511,20 +513,20 @@ export default function CommunityFeed({
                         </div>
                       )}
                     </div>
-                    <div>
+                    <div className="min-w-0">
                       <div className="flex items-center gap-1.5 flex-wrap">
-                        <span className="font-semibold text-sm text-[#1F1A1B] group-hover:text-[#BE3A50] transition-colors">
+                        <span className="font-semibold text-xs sm:text-sm text-[#1F1A1B] group-hover:text-[#BE3A50] transition-colors truncate">
                           {post.author.name}
                         </span>
                         {post.author.isPhotoVerified && (
-                          <span className="inline-flex items-center gap-0.5 bg-[#DCFCE7] text-[#15803d] text-[10px] font-bold px-1.5 py-0.2 rounded-full">
+                          <span className="inline-flex items-center gap-0.5 bg-[#DCFCE7] text-[#15803d] text-[10px] font-bold px-1.5 py-0.2 rounded-full whitespace-nowrap">
                             <ShieldCheck className="w-2.5 h-2.5" /> Lajang
                           </span>
                         )}
                       </div>
-                      <p className="text-[11px] text-[#6B6365]">
-                        {post.author.currentCity} • {post.author.age} thn • {post.author.mbti} •{' '}
-                        <span className="text-[#8C8385]">{formatTimeAgo(post.createdAt)}</span>
+                      <p className="text-[11px] text-[#6B6365] flex items-center gap-1 flex-wrap">
+                        <span>{post.author.currentCity} • {post.author.age} thn</span>
+                        <span className="text-[#8C8385] whitespace-nowrap">• {formatTimeAgo(post.createdAt)}</span>
                       </p>
                     </div>
                   </div>
@@ -534,7 +536,7 @@ export default function CommunityFeed({
                     <button
                       type="button"
                       onClick={() => onViewProfile(post.author)}
-                      className="px-3 py-1 bg-[#FBEBEE] hover:bg-[#F3D5DB] text-[#BE3A50] rounded-full text-xs font-semibold flex items-center gap-1 transition-all shrink-0"
+                      className="px-2.5 sm:px-3 py-1 bg-[#FBEBEE] hover:bg-[#F3D5DB] text-[#BE3A50] rounded-full text-xs font-semibold flex items-center gap-1 transition-all shrink-0 whitespace-nowrap"
                     >
                       <UserCheck className="w-3.5 h-3.5" />
                       <span className="hidden sm:inline">Kenalan</span>
@@ -631,8 +633,8 @@ export default function CommunityFeed({
                           return (
                             <div
                               key={comment.id}
-                              className={`flex items-start gap-2.5 ${
-                                isReply ? 'ml-6 sm:ml-8 pl-2.5 border-l-2 border-[#BE3A50]/30' : ''
+                              className={`flex items-start gap-2 ${
+                                isReply ? 'ml-2.5 sm:ml-6 pl-2 sm:pl-3 border-l-2 border-[#BE3A50]/40' : ''
                               }`}
                             >
                               <div
@@ -652,30 +654,33 @@ export default function CommunityFeed({
                                 )}
                               </div>
 
-                              <div className="flex-1 bg-white p-2.5 rounded-xl border border-[#E8E2D8] shadow-2xs">
-                                <div className="flex items-center justify-between gap-2 mb-1">
-                                  <div className="flex items-center gap-1.5 flex-wrap">
-                                    <span
-                                      onClick={() => onViewProfile(comment.author)}
-                                      className="font-semibold text-xs text-[#1F1A1B] cursor-pointer hover:text-[#BE3A50]"
-                                    >
-                                      {comment.author.name}
-                                    </span>
-                                    {comment.author.isPhotoVerified && (
-                                      <ShieldCheck className="w-3 h-3 text-[#15803d]" />
-                                    )}
-                                    {comment.replyToAuthorName && (
-                                      <span className="text-[10px] text-[#BE3A50] bg-[#FBEBEE] px-1.5 py-0.2 rounded-full font-medium">
-                                        membalas @{comment.replyToAuthorName}
+                              <div className="flex-1 min-w-0 bg-white p-2.5 rounded-xl border border-[#E8E2D8] shadow-2xs">
+                                <div className="flex items-start justify-between gap-1.5 mb-1">
+                                  <div className="min-w-0 flex-1">
+                                    <div className="flex items-center gap-1">
+                                      <span
+                                        onClick={() => onViewProfile(comment.author)}
+                                        className="font-semibold text-xs text-[#1F1A1B] cursor-pointer hover:text-[#BE3A50] truncate"
+                                      >
+                                        {comment.author.name}
                                       </span>
+                                      {comment.author.isPhotoVerified && (
+                                        <ShieldCheck className="w-3 h-3 text-[#15803d] shrink-0" />
+                                      )}
+                                    </div>
+                                    {comment.replyToAuthorName && (
+                                      <div className="inline-flex items-center gap-0.5 text-[10px] text-[#BE3A50] bg-[#FBEBEE] px-1.5 py-0.2 rounded-md font-medium mt-0.5 truncate max-w-full">
+                                        <CornerDownRight className="w-2.5 h-2.5 shrink-0" />
+                                        <span className="truncate">membalas @{comment.replyToAuthorName}</span>
+                                      </div>
                                     )}
                                   </div>
-                                  <span className="text-[10px] text-[#8C8385]">
+                                  <span className="text-[10px] text-[#8C8385] whitespace-nowrap shrink-0 pt-0.5">
                                     {formatTimeAgo(comment.createdAt)}
                                   </span>
                                 </div>
 
-                                <p className="text-xs text-[#1F1A1B] leading-relaxed">
+                                <p className="text-xs text-[#1F1A1B] leading-relaxed break-words">
                                   {comment.content}
                                 </p>
 
@@ -702,14 +707,16 @@ export default function CommunityFeed({
                     {/* Target Reply Indicator */}
                     {replyTarget && (
                       <div className="flex items-center justify-between bg-[#FBEBEE] text-[#BE3A50] px-3 py-1.5 rounded-lg text-xs font-medium">
-                        <span className="flex items-center gap-1">
-                          <CornerDownRight className="w-3.5 h-3.5" />
-                          Membalas pesan <strong>@{replyTarget.authorName}</strong>
+                        <span className="flex items-center gap-1 truncate">
+                          <CornerDownRight className="w-3.5 h-3.5 shrink-0" />
+                          <span className="truncate">
+                            Membalas <strong>@{replyTarget.authorName}</strong>
+                          </span>
                         </span>
                         <button
                           type="button"
                           onClick={() => handleCancelReply(post.id)}
-                          className="hover:bg-white/50 p-0.5 rounded-sm"
+                          className="hover:bg-white/50 p-0.5 rounded-sm shrink-0 ml-2"
                           aria-label="Batalkan balasan"
                         >
                           <X className="w-3.5 h-3.5" />
@@ -718,7 +725,7 @@ export default function CommunityFeed({
                     )}
 
                     {/* Input Kolom Balasan Baru */}
-                    <div className="flex items-center gap-2 pt-1">
+                    <div className="flex items-center gap-1.5 sm:gap-2 pt-1">
                       <input
                         type="text"
                         value={commentInputs[post.id] || ''}
@@ -733,16 +740,16 @@ export default function CommunityFeed({
                         }}
                         placeholder={
                           replyTarget
-                            ? `Tulis balasan untuk @${replyTarget.authorName}...`
+                            ? `Balas @${replyTarget.authorName}...`
                             : 'Tulis balasan atau sapaan...'
                         }
-                        className="flex-1 text-xs text-[#1F1A1B] bg-white border border-[#E8E2D8] rounded-full px-3.5 py-2 focus:outline-hidden focus:border-[#BE3A50]"
+                        className="min-w-0 flex-1 text-xs text-[#1F1A1B] bg-white border border-[#E8E2D8] rounded-full px-3 sm:px-3.5 py-2 focus:outline-hidden focus:border-[#BE3A50]"
                       />
                       <button
                         type="button"
                         onClick={() => handleSendComment(post.id)}
                         disabled={isSubmittingComment || !(commentInputs[post.id] || '').trim()}
-                        className="p-2 bg-[#BE3A50] hover:bg-[#A32F42] active:scale-95 disabled:opacity-50 text-white rounded-full transition-all shrink-0"
+                        className="w-8 h-8 sm:w-9 sm:h-9 bg-[#BE3A50] hover:bg-[#A32F42] active:scale-95 disabled:opacity-50 text-white rounded-full transition-all shrink-0 flex items-center justify-center shadow-xs"
                         title="Kirim balasan"
                         aria-label="Kirim balasan"
                       >
@@ -759,3 +766,4 @@ export default function CommunityFeed({
     </div>
   );
 }
+
