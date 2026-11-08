@@ -210,7 +210,7 @@ export default function Home() {
     : null;
 
   return (
-    <div className="min-h-screen bg-[#FAF7F2] flex flex-col pb-20 md:pb-8">
+    <div className="min-h-screen bg-[#FAF7F2] flex flex-col pb-28 md:pb-8">
       {/* Navbar Global */}
       <Navbar
         activeTab={activeTab}
