@@ -11,7 +11,7 @@ Aplikasi web modern untuk pencarian pasangan hidup yang berorientasi pernikahan,
    - Perhitungan umur otomatis dari tahun kelahiran.
    - Pilihan kepribadian MBTI lengkap dengan **Kuis Cepat MBTI (4 pertanyaan interaktif)** bagi yang belum tahu tipe kepribadiannya.
    - Upload foto maksimal 5MB dengan **verifikasi deteksi wajah di browser** (mencegah foto kartun, anime, atau pemandangan).
-   - Keterangan diri (bio), hobi, keahlian, tinggi badan, status keturunan (anak), dan preferensi **Strict Straight** (Pria mencari Wanita, Wanita mencari Pria).
+   - Keterangan diri (bio), hobi, keahlian, tinggi badan, asal keturunan / etnisitas (misal Chindo, Jawa, Sunda, Batak, Minang, dll.), dan preferensi **Strict Straight** (Pria mencari Wanita, Wanita mencari Pria).
    - Ringkasan profil otomatis dan moderasi konten anti-SARA/18+ ditenagai **Google Gemini AI**.
 
 2. **AI Matchmaking 1-1 (Straight):**
@@ -67,10 +67,13 @@ Aplikasi web modern untuk pencarian pasangan hidup yang berorientasi pernikahan,
    ```
 2. **Deploy di Vercel:**
    - Buka [vercel.com](https://vercel.com) dan buat **New Project**.
-   - Import repositori GitHub Anda.
-   - (Opsional) Tambahkan Environment Variable:
-     - `NEXT_PUBLIC_GEMINI_API_KEY`: API Key gratisan dari [Google AI Studio](https://aistudio.google.com).
-   - Klik **Deploy**.
+   - Import repositori GitHub `Marcelloaja/caripacaronline`.
+   - Di bagian **Environment Variables**, masukkan variabel berikut dari Supabase dan Gemini AI:
+     - `NEXT_PUBLIC_SUPABASE_URL`: URL project Supabase Anda
+     - `NEXT_PUBLIC_SUPABASE_ANON_KEY`: Publishable / Anon Key Supabase
+     - `SUPABASE_SERVICE_ROLE_KEY`: Secret / Service Role Key Supabase
+     - `NEXT_PUBLIC_GEMINI_API_KEY`: API Key gratisan dari [Google AI Studio](https://aistudio.google.com)
+   - Klik **Deploy**. Database Supabase sudah siap dengan tabel dan trigger realtime.
 
 ---
 
