@@ -1,36 +1,83 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Cari Pacar Online (Platform Pasangan Serius & Masa Depan)
 
-## Getting Started
+Aplikasi web modern untuk pencarian pasangan hidup yang berorientasi pernikahan, bebas dari akun palsu dan perselingkuhan. Dibangun menggunakan **Next.js (App Router)**, **TypeScript**, **Tailwind CSS**, dan **PWA (Progressive Web App)**, siap untuk dideploy langsung ke **Vercel**.
 
-First, run the development server:
+---
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## 🌟 Fitur Utama & Kepatuhan Spesifikasi
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+1. **Biodata Lengkap & Verifikasi Otomatis:**
+   - Nama asli panggilan, kota asal, domisili saat ini, dan negara.
+   - Perhitungan umur otomatis dari tahun kelahiran.
+   - Pilihan kepribadian MBTI lengkap dengan **Kuis Cepat MBTI (4 pertanyaan interaktif)** bagi yang belum tahu tipe kepribadiannya.
+   - Upload foto maksimal 5MB dengan **verifikasi deteksi wajah di browser** (mencegah foto kartun, anime, atau pemandangan).
+   - Keterangan diri (bio), hobi, keahlian, tinggi badan, status keturunan (anak), dan preferensi **Strict Straight** (Pria mencari Wanita, Wanita mencari Pria).
+   - Ringkasan profil otomatis dan moderasi konten anti-SARA/18+ ditenagai **Google Gemini AI**.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+2. **AI Matchmaking 1-1 (Straight):**
+   - Menampilkan profil lawan jenis yang relevan dan kompatibel.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+3. **Tampilan Kartu Interaktif (Card Deck):**
+   - Tombol **Lewati (Skip)**, **Love (Suka)**, dan **Love + Catatan** (pesan pembuka dengan moderasi teks real-time).
 
-## Learn More
+4. **Sistem Notifikasi Love & Catatan:**
+   - Dropdown notifikasi real-time yang memuat pengirim love, catatan perkenalan, dan waktu kirim.
 
-To learn more about Next.js, take a look at the following resources:
+5. **Tab "Menyukai Saya":**
+   - Melihat daftar siapa saja yang telah memberikan Love kepada Anda.
+   - Tombol langsung **"Balas Suka & Hubungkan"** untuk otomatis menjadi Match.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+6. **Kencan Virtual Terintegrasi (Jitsi Meet):**
+   - Panggilan video 1-on-1 langsung di browser menggunakan Jitsi Meet terenkripsi tanpa biaya.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+7. **Obrolan Realtime dengan Indikator Sinyal/Jaringan:**
+   - Obrolan pesan dengan centang status (mengirim, terkirim, dibaca).
+   - Indikator sinyal visual (Online, Sinyal Lemah, Offline) dan banner peringatan saat jaringan bermasalah.
 
-## Deploy on Vercel
+8. **Inovasi AI & Komitmen Serius:**
+   - **Ikrar Integritas Lajang (*Single's Pledge*):** Pernyataan wajib tidak terikat pernikahan sah demi mencegah perselingkuhan.
+   - **Fitur Pelaporan Akun:** Laporkan dugaan perselingkuhan atau akun palsu.
+   - **AI Icebreaker Generator:** Ditenagai Gemini untuk membuat pertanyaan pembuka kencan yang sopan dan tidak membosankan.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+9. **Progressive Web App (PWA):**
+   - File `manifest.json` dan `sw.js` (Service Worker) terpasang, aplikasi dapat di-install di layar utama ponsel/desktop dan mendukung push notification.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+10. **Filter Domisili Kota:**
+    - Filter pencarian pasangan berdasarkan kota domisili di seluruh Indonesia.
+
+---
+
+## 🚀 Cara Menjalankan Proyek Secara Lokal
+
+1. Jalankan server pengembangan:
+   ```bash
+   npm run dev
+   ```
+2. Buka browser di [http://localhost:3000](http://localhost:3000).
+
+---
+
+## ☁️ Panduan Deploy ke Vercel
+
+1. **Push ke GitHub:**
+   ```bash
+   git add .
+   git commit -m "feat: complete Cari Pacar Online web app"
+   git push origin main
+   ```
+2. **Deploy di Vercel:**
+   - Buka [vercel.com](https://vercel.com) dan buat **New Project**.
+   - Import repositori GitHub Anda.
+   - (Opsional) Tambahkan Environment Variable:
+     - `NEXT_PUBLIC_GEMINI_API_KEY`: API Key gratisan dari [Google AI Studio](https://aistudio.google.com).
+   - Klik **Deploy**.
+
+---
+
+## 🎨 Standar Desain Anti-Slop
+
+Desain aplikasi ini dibuat dengan palet warna bernuansa hangat, elegan, dan manusiawi (*Human-Crafted*):
+- **Primary:** Rosewood Terracotta (`#BE3A50`)
+- **Background Canvas:** Warm Linen Cream (`#FAF7F2`)
+- **Text:** Deep Charcoal High Contrast (`#1F1A1B` - Rasio WCAG 16.08:1)
+- Bebas dari gradien ungu generik AI, shadow berlebihan, maupun teks klise.

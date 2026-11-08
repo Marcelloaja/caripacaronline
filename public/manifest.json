@@ -1,0 +1,23 @@
+{
+  "name": "Cari Pacar Online - Pasangan Serius",
+  "short_name": "CariPacar",
+  "description": "Temukan pasangan hidup yang satu frekuensi dengan verifikasi keaslian dan komitmen serius.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#FAF7F2",
+  "theme_color": "#BE3A50",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
+
