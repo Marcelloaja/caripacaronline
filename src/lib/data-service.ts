@@ -6,26 +6,54 @@ import * as localStore from './storage';
  * 1. PROFIL PENGGUNA (PROFILES)
  */
 
-export async function fetchCurrentUser(): Promise<UserProfile | null> {
-  // Ambil id user yang tersimpan di browser ini
-  const localUser = localStore.getCurrentUser();
-  if (!localUser) return null;
-
+export async function fetchProfileById(userId: string): Promise<UserProfile | null> {
   if (isSupabaseConfigured() && supabase) {
     try {
       const { data, error } = await supabase
         .from('profiles')
         .select('*')
-        .eq('id', localUser.id)
+        .eq('id', userId)
         .single();
 
       if (data && !error) {
-        const mapped: UserProfile = mapFromDbProfile(data);
+        const mapped = mapFromDbProfile(data);
         localStore.saveCurrentUser(mapped);
         return mapped;
       }
     } catch {
-      // Fallback ke local storage jika query gagal
+      // ignore
+    }
+  }
+
+  const local = localStore.getCurrentUser();
+  if (local && local.id === userId) return local;
+  return null;
+}
+
+export async function fetchCurrentUser(): Promise<UserProfile | null> {
+  // Cek sesi Supabase aktif terlebih dahulu
+  if (isSupabaseConfigured() && supabase) {
+    try {
+      const { data } = await supabase.auth.getSession();
+      if (data.session?.user?.id) {
+        const profile = await fetchProfileById(data.session.user.id);
+        if (profile) return profile;
+      }
+    } catch {
+      // Fallback
+    }
+  }
+
+  // Fallback ke penyimpanan browser lokal
+  const localUser = localStore.getCurrentUser();
+  if (!localUser) return null;
+
+  if (isSupabaseConfigured() && supabase) {
+    try {
+      const profile = await fetchProfileById(localUser.id);
+      if (profile) return profile;
+    } catch {
+      // Fallback ke local storage
     }
   }
 

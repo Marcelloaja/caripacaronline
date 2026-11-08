@@ -4,7 +4,8 @@ import React, { useState, useEffect } from 'react';
 import confetti from 'canvas-confetti';
 import {
   Heart, Sparkles, MessageCircle, User, ShieldCheck,
-  Video, MapPin, CheckCircle, Bell, ArrowRight
+  Video, MapPin, CheckCircle, Bell, ArrowRight,
+  Fingerprint, LogOut, CheckCircle2, Loader2, Mail
 } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import DiscoveryDeck from '@/components/DiscoveryDeck';
@@ -12,11 +13,14 @@ import LikesReceivedView from '@/components/LikesReceivedView';
 import ChatAndVideoRoom from '@/components/ChatAndVideoRoom';
 import OnboardingModal from '@/components/OnboardingModal';
 import ReportModal from '@/components/ReportModal';
+import AuthModal from '@/components/AuthModal';
 import {
   UserProfile, LoveInteraction, Match, AppNotification
 } from '@/types';
 import * as dataService from '@/lib/data-service';
 import { getNotifications, markNotificationsAsRead } from '@/lib/storage';
+import { signOutUser } from '@/lib/auth-service';
+import { isBiometricsAvailable, registerBiometrics, getSavedBiometricAccount } from '@/lib/biometric-auth';
 
 export default function Home() {
   const [mounted, setMounted] = useState(false);
@@ -32,24 +36,40 @@ export default function Home() {
   // Active Chat State
   const [activeMatch, setActiveMatch] = useState<Match | null>(null);
 
-  // Modals
+  // Modals & Auth States
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const [authAccount, setAuthAccount] = useState<{ id: string; email: string } | null>(null);
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [reportedUser, setReportedUser] = useState<UserProfile | null>(null);
   const [matchedCelebrationUser, setMatchedCelebrationUser] = useState<UserProfile | null>(null);
 
+  // Biometrics Hardware & Registration Status
+  const [hasBiometricHardware, setHasBiometricHardware] = useState(false);
+  const [isBiometricsEnrolled, setIsBiometricsEnrolled] = useState(false);
+  const [bioLoading, setBioLoading] = useState(false);
+  const [bioStatusMsg, setBioStatusMsg] = useState('');
+
   // Network Status Simulation (Online, Slow, Offline)
   const [networkStatus, setNetworkStatus] = useState<'online' | 'slow' | 'offline'>('online');
 
-  // Load Client Data
+  // Load Client Data & Check Biometrics
   useEffect(() => {
     setMounted(true);
     setNotifications(getNotifications());
+
+    // Cek sensor biometrik perangkat
+    isBiometricsAvailable().then((supported) => {
+      setHasBiometricHardware(supported);
+      if (supported) {
+        setIsBiometricsEnrolled(Boolean(getSavedBiometricAccount()));
+      }
+    });
 
     // Ambil profil user aktif
     dataService.fetchCurrentUser().then((user) => {
       setCurrentUser(user);
       if (!user) {
-        setShowOnboarding(true);
+        setShowAuthModal(true);
       } else {
         // Ambil kandidat pasangan yang cocok
         dataService.fetchCandidates(user).then(setCandidates);
@@ -70,10 +90,66 @@ export default function Home() {
     };
   }, []);
 
+  // Handler Berhasil Login / Register
+  const handleAuthSuccess = async (
+    account: { id: string; email: string },
+    isNewUser: boolean
+  ) => {
+    setAuthAccount(account);
+    setShowAuthModal(false);
+
+    if (isNewUser) {
+      setShowOnboarding(true);
+    } else {
+      const profile = await dataService.fetchProfileById(account.id);
+      if (profile && profile.hasSignedPledge) {
+        setCurrentUser(profile);
+        dataService.fetchCandidates(profile).then(setCandidates);
+        dataService.fetchInteractions(profile.id).then(setInteractions);
+        dataService.fetchMatches(profile.id).then(setMatches);
+      } else {
+        setShowOnboarding(true);
+      }
+    }
+  };
+
+  // Handler Keluar (Logout)
+  const handleSignOut = async () => {
+    await signOutUser();
+    setCurrentUser(null);
+    setCandidates([]);
+    setInteractions([]);
+    setMatches([]);
+    setShowAuthModal(true);
+  };
+
+  // Handler Daftarkan Sidik Jari (Biometrik)
+  const handleEnrollBiometrics = async () => {
+    if (!currentUser) return;
+    setBioLoading(true);
+    setBioStatusMsg('');
+
+    try {
+      const emailToUse = currentUser.email || `${currentUser.name.toLowerCase().replace(/\s+/g, '')}@caripacar.app`;
+      const result = await registerBiometrics(currentUser.id, emailToUse);
+
+      if (result.success) {
+        setIsBiometricsEnrolled(true);
+        setBioStatusMsg('Sensor sidik jari berhasil diaktifkan untuk akun ini!');
+      } else {
+        setBioStatusMsg(result.error || 'Gagal mengaktifkan sensor sidik jari.');
+      }
+    } catch (err: any) {
+      setBioStatusMsg(err.message || 'Gagal memproses sidik jari.');
+    } finally {
+      setBioLoading(false);
+    }
+  };
+
   // Handler Kirim Love atau Love + Catatan
   const handleSendInteraction = async (toUserId: string, type: 'love' | 'love_note', note?: string) => {
     if (!currentUser) {
-      setShowOnboarding(true);
+      setShowAuthModal(true);
       return;
     }
 
@@ -113,7 +189,7 @@ export default function Home() {
   // Handler Balas Suka dari View "Menyukai Saya"
   const handleReciprocateLove = async (targetUser: UserProfile) => {
     if (!currentUser) {
-      setShowOnboarding(true);
+      setShowAuthModal(true);
       return;
     }
     await handleSendInteraction(targetUser.id, 'love');
@@ -149,6 +225,8 @@ export default function Home() {
         }}
         networkStatus={networkStatus}
         onOpenOnboarding={() => setShowOnboarding(true)}
+        onOpenAuth={() => setShowAuthModal(true)}
+        onSignOut={handleSignOut}
       />
 
       {/* Main Container */}
@@ -316,30 +394,113 @@ export default function Home() {
                 </div>
               </div>
 
-              {/* Tombol Edit Profil */}
-              <div className="pt-2">
+              {/* Informasi Akun Terdaftar */}
+              <div className="p-3.5 bg-[#FAF7F2] rounded-2xl border border-[#E8E2D8] flex items-center justify-between">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-8 h-8 rounded-xl bg-white border border-[#E8E2D8] flex items-center justify-center text-[#BE3A50]">
+                    <Mail className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <span className="text-[10px] text-[#6B6365] block">Akun Login:</span>
+                    <span className="text-xs font-semibold text-[#1F1A1B]">
+                      {currentUser.email || authAccount?.email || 'Akun Terverifikasi'}
+                    </span>
+                  </div>
+                </div>
+                <span className="text-[10px] px-2 py-0.5 rounded-full bg-green-100 text-green-800 font-medium">
+                  Aktif
+                </span>
+              </div>
+
+              {/* Pengaturan Login Sidik Jari / Biometrik */}
+              <div className="p-4 rounded-2xl border border-[#BE3A50]/20 bg-[#FBEBEE]/50 space-y-3">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex items-center gap-2 text-xs font-bold text-[#BE3A50]">
+                    <Fingerprint className="w-4 h-4" />
+                    <span>Login Sidik Jari / Biometrik</span>
+                  </div>
+                  {isBiometricsEnrolled && (
+                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#15803D] text-white font-semibold flex items-center gap-1">
+                      <CheckCircle2 className="w-3 h-3" />
+                      Aktif di HP/Laptop Ini
+                    </span>
+                  )}
+                </div>
+
+                <p className="text-[11px] text-[#6B6365] leading-relaxed">
+                  Gunakan pemindai sidik jari (Fingerprint, Touch ID, Face ID, atau Windows Hello) pada perangkat Anda untuk masuk langsung tanpa repot mengetik kata sandi.
+                </p>
+
+                {bioStatusMsg && (
+                  <div className="p-2.5 rounded-xl bg-white border border-[#BE3A50]/30 text-xs font-medium text-[#BE3A50]">
+                    {bioStatusMsg}
+                  </div>
+                )}
+
+                {hasBiometricHardware ? (
+                  <button
+                    type="button"
+                    onClick={handleEnrollBiometrics}
+                    disabled={bioLoading}
+                    className="w-full py-2.5 rounded-xl bg-white hover:bg-[#FAF7F2] border border-[#BE3A50]/30 text-[#BE3A50] text-xs font-bold transition-all flex items-center justify-center gap-2 shadow-sm disabled:opacity-50"
+                  >
+                    {bioLoading ? (
+                      <>
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                        <span>Memindai Sidik Jari...</span>
+                      </>
+                    ) : isBiometricsEnrolled ? (
+                      <>
+                        <Fingerprint className="w-4 h-4" />
+                        <span>Daftarkan Ulang Sidik Jari</span>
+                      </>
+                    ) : (
+                      <>
+                        <Fingerprint className="w-4 h-4" />
+                        <span>Aktifkan Login Sidik Jari Sekarang</span>
+                      </>
+                    )}
+                  </button>
+                ) : (
+                  <p className="text-[11px] text-[#6B6365] italic">
+                    Sensor sidik jari tidak terdeteksi pada peramban/perangkat ini.
+                  </p>
+                )}
+              </div>
+
+              {/* Tombol Aksi: Edit & Logout */}
+              <div className="pt-2 space-y-2">
                 <button
                   onClick={() => setShowOnboarding(true)}
                   className="w-full py-2.5 bg-[#BE3A50] hover:bg-[#a32f42] text-white rounded-xl text-xs font-bold transition-all shadow-sm flex items-center justify-center gap-2"
                 >
                   <span>Edit Data Profil & Foto</span>
                 </button>
+
+                <button
+                  onClick={handleSignOut}
+                  className="w-full py-2.5 bg-white hover:bg-red-50 text-red-600 border border-red-200 rounded-xl text-xs font-bold transition-all shadow-sm flex items-center justify-center gap-2"
+                >
+                  <LogOut className="w-4 h-4" />
+                  <span>Keluar dari Akun (Logout)</span>
+                </button>
               </div>
             </div>
           ) : (
-            <div className="w-full max-w-xl mx-auto bg-white rounded-3xl border border-[#E8E2D8] p-10 text-center space-y-3">
+            <div className="w-full max-w-xl mx-auto bg-white rounded-3xl border border-[#E8E2D8] p-10 text-center space-y-4">
               <div className="w-14 h-14 rounded-full bg-[#FAF7F2] text-[#BE3A50] flex items-center justify-center mx-auto">
                 <User className="w-7 h-7" />
               </div>
-              <h3 className="font-bold text-base text-[#1F1A1B]">Belum Memiliki Profil</h3>
+              <h3 className="font-bold text-base text-[#1F1A1B]">Belum Masuk ke Akun</h3>
               <p className="text-xs text-[#6B6365]">
-                Daftarkan profil dan foto asli Anda untuk mulai menemukan calon pasangan hidup.
+                Masuk atau daftarkan akun baru untuk mulai mencari pasangan serius dan mengaktifkan login sidik jari.
               </p>
               <button
-                onClick={() => setShowOnboarding(true)}
-                className="px-6 py-2.5 bg-[#BE3A50] hover:bg-[#a32f42] text-white rounded-xl text-xs font-bold transition-all shadow-sm"
+                onClick={() => setShowAuthModal(true)}
+                className="px-6 py-2.5 bg-[#BE3A50] hover:bg-[#a32f42] text-white rounded-xl text-xs font-bold transition-all shadow-sm inline-flex items-center gap-2"
               >
-                Buat Profil Sekarang
+                <Fingerprint className="w-4 h-4" />
+                <span>Masuk / Daftar Akun</span>
               </button>
             </div>
           )
@@ -405,6 +566,8 @@ export default function Home() {
         isOpen={showOnboarding}
         onClose={() => setShowOnboarding(false)}
         initialProfile={currentUser}
+        authUserId={authAccount?.id}
+        authEmail={authAccount?.email}
         canClose={Boolean(currentUser)}
         onSaveProfile={async (updated) => {
           await dataService.saveProfile(updated);
@@ -419,6 +582,15 @@ export default function Home() {
         onClose={() => setReportedUser(null)}
         targetUser={reportedUser}
         reporterId={currentUser?.id}
+      />
+
+      {/* Auth Modal (Login / Register / Biometrics) */}
+      <AuthModal
+        isOpen={showAuthModal}
+        onClose={() => {
+          if (currentUser) setShowAuthModal(false);
+        }}
+        onAuthSuccess={handleAuthSuccess}
       />
     </div>
   );

@@ -1,7 +1,10 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Heart, MessageCircle, User, Bell, Wifi, WifiOff, AlertTriangle, Sparkles, CheckCircle2 } from 'lucide-react';
+import {
+  Heart, MessageCircle, User, Bell, Wifi, WifiOff, AlertTriangle,
+  Sparkles, CheckCircle2, LogIn, LogOut
+} from 'lucide-react';
 import { AppNotification, UserProfile } from '@/types';
 
 interface NavbarProps {
@@ -14,6 +17,8 @@ interface NavbarProps {
   onMarkNotificationsRead: () => void;
   networkStatus: 'online' | 'slow' | 'offline';
   onOpenOnboarding: () => void;
+  onOpenAuth?: () => void;
+  onSignOut?: () => void;
 }
 
 export default function Navbar({
@@ -25,7 +30,9 @@ export default function Navbar({
   notifications,
   onMarkNotificationsRead,
   networkStatus,
-  onOpenOnboarding
+  onOpenOnboarding,
+  onOpenAuth,
+  onSignOut
 }: NavbarProps) {
   const [showNotifDropdown, setShowNotifDropdown] = useState(false);
   const unreadNotifs = notifications.filter(n => !n.isRead).length;
@@ -208,6 +215,34 @@ export default function Navbar({
               </div>
             )}
           </div>
+
+          {/* User Auth Action Button */}
+          {currentUser ? (
+            <div className="flex items-center gap-1.5 pl-1">
+              <button
+                onClick={() => setActiveTab('profile')}
+                className="flex items-center gap-2 p-1 pr-2.5 rounded-full border border-[#E8E2D8] bg-white hover:bg-[#F0EBE1] transition-all"
+                title={`Profil ${currentUser.name}`}
+              >
+                <img
+                  src={currentUser.photoUrl}
+                  alt={currentUser.name}
+                  className="w-7 h-7 rounded-full object-cover border border-[#BE3A50]/30"
+                />
+                <span className="text-xs font-semibold text-[#1F1A1B] hidden lg:inline max-w-[80px] truncate">
+                  {currentUser.name}
+                </span>
+              </button>
+            </div>
+          ) : (
+            <button
+              onClick={onOpenAuth}
+              className="px-3 py-1.5 rounded-xl bg-[#BE3A50] hover:bg-[#a32f42] text-white text-xs font-bold transition-all flex items-center gap-1.5 shadow-sm"
+            >
+              <LogIn className="w-3.5 h-3.5" />
+              <span>Masuk / Daftar</span>
+            </button>
+          )}
         </div>
       </div>
 

@@ -7,6 +7,7 @@
 -- 1. Tabel Profil Pengguna (Profiles)
 CREATE TABLE IF NOT EXISTS public.profiles (
   id TEXT PRIMARY KEY,
+  email TEXT,
   name TEXT NOT NULL,
   gender TEXT NOT NULL CHECK (gender IN ('pria', 'wanita')),
   interested_in TEXT NOT NULL CHECK (interested_in IN ('pria', 'wanita')),
@@ -29,6 +30,9 @@ CREATE TABLE IF NOT EXISTS public.profiles (
   created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
+-- Migrasi tambahan untuk tabel profiles yang sudah ada:
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS email TEXT;
+
 -- 2. Tabel Interaksi Suka (Interactions: Love & Love Note)
 CREATE TABLE IF NOT EXISTS public.interactions (
   id TEXT PRIMARY KEY,
@@ -38,6 +42,9 @@ CREATE TABLE IF NOT EXISTS public.interactions (
   note TEXT,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
+
+-- Migrasi tambahan untuk tabel profiles yang sudah ada:
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS email TEXT;
 
 -- 3. Tabel Pasangan Cocok (Matches)
 CREATE TABLE IF NOT EXISTS public.matches (
@@ -49,6 +56,9 @@ CREATE TABLE IF NOT EXISTS public.matches (
   created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
+-- Migrasi tambahan untuk tabel profiles yang sudah ada:
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS email TEXT;
+
 -- 4. Tabel Pesan Obrolan (Messages)
 CREATE TABLE IF NOT EXISTS public.messages (
   id TEXT PRIMARY KEY,
@@ -59,6 +69,9 @@ CREATE TABLE IF NOT EXISTS public.messages (
   created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
+-- Migrasi tambahan untuk tabel profiles yang sudah ada:
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS email TEXT;
+
 -- 5. Tabel Laporan Pelanggaran (Reports: Anti-Selingkuh & Akun Palsu)
 CREATE TABLE IF NOT EXISTS public.reports (
   id TEXT PRIMARY KEY,
@@ -68,6 +81,9 @@ CREATE TABLE IF NOT EXISTS public.reports (
   details TEXT,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
+
+-- Migrasi tambahan untuk tabel profiles yang sudah ada:
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS email TEXT;
 
 -- Indexing untuk query cepat
 CREATE INDEX IF NOT EXISTS idx_profiles_gender ON public.profiles(gender);

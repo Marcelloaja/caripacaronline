@@ -9,6 +9,7 @@ export type MBTIType =
 export interface UserProfile {
   id: string;
   name: string; // nama asli panggilan
+  email?: string; // alamat email akun
   gender: Gender;
   interestedIn: Gender; // 'wanita' jika pria, 'pria' jika wanita (Straight only)
   originCity: string; // Asli mana

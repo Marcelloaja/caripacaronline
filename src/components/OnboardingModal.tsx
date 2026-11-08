@@ -18,6 +18,8 @@ interface OnboardingModalProps {
   onClose: () => void;
   onSaveProfile: (profile: UserProfile) => void;
   initialProfile?: UserProfile | null;
+  authUserId?: string;
+  authEmail?: string;
   canClose?: boolean;
 }
 
@@ -26,6 +28,8 @@ export default function OnboardingModal({
   onClose,
   onSaveProfile,
   initialProfile,
+  authUserId,
+  authEmail,
   canClose = true
 }: OnboardingModalProps) {
   const currentYear = new Date().getFullYear();
@@ -163,7 +167,8 @@ export default function OnboardingModal({
     }
 
     const finalProfile: UserProfile = {
-      id: initialProfile?.id || `user_${Date.now()}`,
+      id: initialProfile?.id || authUserId || `user_${Date.now()}`,
+      email: initialProfile?.email || authEmail,
       name: name.trim(),
       gender,
       interestedIn,
