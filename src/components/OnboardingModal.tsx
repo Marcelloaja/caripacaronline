@@ -175,7 +175,13 @@ export default function OnboardingModal({
     }, 'image/jpeg', 0.9);
   };
 
-  // Tutup kamera saat modal ditutup
+  // Tutup kamera saat modal ditutup atau unmount
+  React.useEffect(() => {
+    return () => {
+      stopLiveCamera();
+    };
+  }, []);
+
   const handleCloseModal = () => {
     stopLiveCamera();
     onClose();
