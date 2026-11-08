@@ -5,7 +5,8 @@ import confetti from 'canvas-confetti';
 import {
   Heart, Sparkles, MessageCircle, User, ShieldCheck,
   Video, MapPin, CheckCircle, Bell, ArrowRight,
-  Fingerprint, LogOut, CheckCircle2, Loader2, Mail
+  Fingerprint, LogOut, CheckCircle2, Loader2, Mail,
+  Trash2, AlertTriangle
 } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import BottomNavigation from '@/components/BottomNavigation';
@@ -21,7 +22,9 @@ import {
 import * as dataService from '@/lib/data-service';
 import { getNotifications, markNotificationsAsRead } from '@/lib/storage';
 import { signOutUser } from '@/lib/auth-service';
-import { isBiometricsAvailable, registerBiometrics, getSavedBiometricAccount } from '@/lib/biometric-auth';
+import {
+  isBiometricsAvailable, registerBiometrics, getSavedBiometricAccount, removeBiometricAccount
+} from '@/lib/biometric-auth';
 
 export default function Home() {
   const [mounted, setMounted] = useState(false);
@@ -43,6 +46,8 @@ export default function Home() {
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [reportedUser, setReportedUser] = useState<UserProfile | null>(null);
   const [matchedCelebrationUser, setMatchedCelebrationUser] = useState<UserProfile | null>(null);
+  const [showDeleteAccountModal, setShowDeleteAccountModal] = useState(false);
+  const [isDeletingAccount, setIsDeletingAccount] = useState(false);
 
   // Biometrics Hardware & Registration Status
   const [hasBiometricHardware, setHasBiometricHardware] = useState(false);
@@ -122,6 +127,28 @@ export default function Home() {
     setInteractions([]);
     setMatches([]);
     setShowAuthModal(true);
+  };
+
+  // Handler Hapus Akun Permanen
+  const handleDeleteAccount = async () => {
+    if (!currentUser) return;
+    setIsDeletingAccount(true);
+
+    try {
+      await dataService.deleteAccount(currentUser.id);
+      await signOutUser();
+      removeBiometricAccount();
+      setCurrentUser(null);
+      setCandidates([]);
+      setInteractions([]);
+      setMatches([]);
+      setShowDeleteAccountModal(false);
+      setShowAuthModal(true);
+    } catch (err) {
+      console.error('Error saat menghapus akun:', err);
+    } finally {
+      setIsDeletingAccount(false);
+    }
   };
 
   // Handler Daftarkan Sidik Jari (Biometrik)
@@ -480,11 +507,23 @@ export default function Home() {
 
                 <button
                   onClick={handleSignOut}
-                  className="w-full py-2.5 bg-white hover:bg-red-50 text-red-600 border border-red-200 rounded-xl text-xs font-bold transition-all shadow-sm flex items-center justify-center gap-2"
+                  className="w-full py-2.5 bg-white hover:bg-gray-100 text-[#6B6365] hover:text-[#1F1A1B] border border-[#E8E2D8] rounded-xl text-xs font-bold transition-all shadow-sm flex items-center justify-center gap-2"
                 >
                   <LogOut className="w-4 h-4" />
                   <span>Keluar dari Akun (Logout)</span>
                 </button>
+
+                {/* Zona Bahaya: Hapus Akun Permanen */}
+                <div className="pt-2 border-t border-red-100">
+                  <button
+                    type="button"
+                    onClick={() => setShowDeleteAccountModal(true)}
+                    className="w-full py-2 bg-red-50 hover:bg-red-100 text-red-600 border border-red-200/60 rounded-xl text-xs font-semibold transition-all flex items-center justify-center gap-2"
+                  >
+                    <Trash2 className="w-3.5 h-3.5 text-red-500" />
+                    <span>Hapus Akun Permanen</span>
+                  </button>
+                </div>
               </div>
             </div>
           ) : (
@@ -603,6 +642,54 @@ export default function Home() {
         }}
         onAuthSuccess={handleAuthSuccess}
       />
+
+      {/* ================= MODAL KONFIRMASI HAPUS AKUN ================= */}
+      {showDeleteAccountModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="relative w-full max-w-sm bg-white rounded-3xl p-6 text-center shadow-2xl border border-[#E8E2D8] space-y-4">
+            <div className="w-14 h-14 rounded-2xl bg-red-100 text-red-600 flex items-center justify-center mx-auto">
+              <AlertTriangle className="w-7 h-7" />
+            </div>
+
+            <div className="space-y-1.5">
+              <h3 className="text-base font-bold text-[#1F1A1B]">Hapus Akun Permanen?</h3>
+              <p className="text-xs text-[#6B6365] leading-relaxed">
+                Apakah Anda yakin ingin menghapus akun ini? Seluruh data profil Anda, foto asli, daftar suka (Love), pasangan cocok (Match), dan riwayat pesan akan <strong>dihapus secara permanen</strong> dari server dan tidak dapat dipulihkan.
+              </p>
+            </div>
+
+            <div className="flex flex-col gap-2 pt-2">
+              <button
+                type="button"
+                disabled={isDeletingAccount}
+                onClick={handleDeleteAccount}
+                className="w-full py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-xl text-xs font-bold transition-all shadow-sm flex items-center justify-center gap-2 disabled:opacity-50"
+              >
+                {isDeletingAccount ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    <span>Menghapus Akun...</span>
+                  </>
+                ) : (
+                  <>
+                    <Trash2 className="w-4 h-4" />
+                    <span>Ya, Hapus Akun Saya</span>
+                  </>
+                )}
+              </button>
+
+              <button
+                type="button"
+                disabled={isDeletingAccount}
+                onClick={() => setShowDeleteAccountModal(false)}
+                className="w-full py-2 text-xs font-semibold text-[#6B6365] hover:text-[#1F1A1B] transition-all"
+              >
+                Batal
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -316,6 +316,21 @@ export async function submitReport(
   }
 }
 
+/**
+ * 6. HAPUS AKUN PERMANEN (DELETE ACCOUNT)
+ */
+export async function deleteAccount(userId: string): Promise<void> {
+  if (isSupabaseConfigured() && supabase) {
+    try {
+      await supabase.from('profiles').delete().eq('id', userId);
+    } catch (err) {
+      console.error('Gagal menghapus profil dari Supabase:', err);
+    }
+  }
+
+  localStore.clearUserData();
+}
+
 // Helper Mappings
 function mapFromDbProfile(d: any): UserProfile {
   return {

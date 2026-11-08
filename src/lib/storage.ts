@@ -204,6 +204,20 @@ export function markNotificationsAsRead(): void {
   localStorage.setItem(KEYS.NOTIFICATIONS, JSON.stringify(list));
 }
 
+export function clearUserData(): void {
+  if (typeof window === 'undefined') return;
+  localStorage.removeItem(KEYS.USER);
+  localStorage.removeItem(KEYS.INTERACTIONS);
+  localStorage.removeItem(KEYS.MATCHES);
+  localStorage.removeItem(KEYS.NOTIFICATIONS);
+  for (let i = localStorage.length - 1; i >= 0; i--) {
+    const key = localStorage.key(i);
+    if (key && key.startsWith(KEYS.MESSAGES)) {
+      localStorage.removeItem(key);
+    }
+  }
+}
+
 export function resetDemoData(): void {
   if (typeof window === 'undefined') return;
   localStorage.clear();

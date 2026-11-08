@@ -64,6 +64,13 @@ export default function OnboardingModal({
   const [isGeneratingSummary, setIsGeneratingSummary] = useState<boolean>(false);
   const [validationError, setValidationError] = useState<string>('');
 
+  // Drag and Drop & Live Camera States
+  const [isDragging, setIsDragging] = useState<boolean>(false);
+  const [isLiveCameraActive, setIsLiveCameraActive] = useState<boolean>(false);
+  const videoRef = React.useRef<HTMLVideoElement | null>(null);
+  const fileInputRef = React.useRef<HTMLInputElement | null>(null);
+  const cameraInputRef = React.useRef<HTMLInputElement | null>(null);
+
   // MBTI Mini Quiz State
   const [showMbtiQuiz, setShowMbtiQuiz] = useState<boolean>(false);
   const [quizAnswers, setQuizAnswers] = useState<{ [key: string]: string }>({});
@@ -74,13 +81,8 @@ export default function OnboardingModal({
   // Strict Straight: Pria hanya mencari Wanita, Wanita hanya mencari Pria
   const interestedIn: Gender = gender === 'pria' ? 'wanita' : 'pria';
 
-  if (!isOpen) return null;
-
-  // Handler Upload Foto dengan Deteksi Wajah
-  const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
+  // Handler Pemrosesan Berkas Foto (Deteksi Wajah & Ukuran)
+  const processSelectedPhoto = async (file: File) => {
     setPhotoError('');
     setIsProcessingPhoto(true);
 
@@ -95,6 +97,91 @@ export default function OnboardingModal({
       setIsPhotoVerified(true);
     }
   };
+
+  // Handler Upload Foto via File Picker
+  const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      processSelectedPhoto(file);
+    }
+  };
+
+  // Drag and Drop Handlers
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+    const file = e.dataTransfer.files?.[0];
+    if (file) {
+      processSelectedPhoto(file);
+    }
+  };
+
+  // Live Camera (Webcam) Handlers
+  const startLiveCamera = async () => {
+    try {
+      setPhotoError('');
+      setIsLiveCameraActive(true);
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: 'user', width: { ideal: 640 }, height: { ideal: 640 } }
+      });
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream;
+        videoRef.current.play();
+      }
+    } catch (err) {
+      setIsLiveCameraActive(false);
+      // Jika webcam desktop tidak dapat diakses, buka kamera bawaan perangkat
+      cameraInputRef.current?.click();
+    }
+  };
+
+  const stopLiveCamera = () => {
+    if (videoRef.current && videoRef.current.srcObject) {
+      const stream = videoRef.current.srcObject as MediaStream;
+      stream.getTracks().forEach((track) => track.stop());
+      videoRef.current.srcObject = null;
+    }
+    setIsLiveCameraActive(false);
+  };
+
+  const captureLivePhoto = () => {
+    if (!videoRef.current) return;
+    const canvas = document.createElement('canvas');
+    canvas.width = videoRef.current.videoWidth || 640;
+    canvas.height = videoRef.current.videoHeight || 640;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+    ctx.drawImage(videoRef.current, 0, 0, canvas.width, canvas.height);
+
+    canvas.toBlob((blob) => {
+      stopLiveCamera();
+      if (blob) {
+        const file = new File([blob], `selfie_${Date.now()}.jpg`, { type: 'image/jpeg' });
+        processSelectedPhoto(file);
+      }
+    }, 'image/jpeg', 0.9);
+  };
+
+  // Tutup kamera saat modal ditutup
+  const handleCloseModal = () => {
+    stopLiveCamera();
+    onClose();
+  };
+
+  if (!isOpen) return null;
 
   // Handler Generator Ringkasan AI
   const handleGenerateSummary = async () => {
@@ -192,6 +279,7 @@ export default function OnboardingModal({
     };
 
     onSaveProfile(finalProfile);
+    stopLiveCamera();
     onClose();
   };
 
@@ -644,65 +732,157 @@ export default function OnboardingModal({
                 <ul className="text-[11px] text-[#6B6365] mt-1 space-y-0.5 list-disc list-inside">
                   <li>Wajib foto asli wajah Anda sendiri (Bukan foto AI, kartun, anime, atau pemandangan).</li>
                   <li>Ukuran maksimal 5MB (Format JPG, PNG, atau WebP).</li>
-                  <li>Sistem otomatis mendeteksi karakteristik wajah manusia sebelum foto diterima.</li>
+                  <li>Bisa ambil foto langsung dengan kamera HP/laptop atau tarik-lepas (drag & drop) berkas.</li>
                 </ul>
               </div>
 
-              <div className="flex flex-col items-center justify-center p-6 border-2 border-dashed border-[#E8E2D8] rounded-3xl bg-[#FAF7F2]/50 hover:bg-[#FAF7F2] transition-all">
-                {photoUrl ? (
-                  <div className="flex flex-col items-center gap-3">
-                    <div className="relative">
-                      <img
-                        src={photoUrl}
-                        alt="Foto Profil"
-                        className="w-36 h-36 rounded-2xl object-cover border-2 border-[#15803D] shadow-md"
-                      />
-                      {isPhotoVerified && (
-                        <div className="absolute -bottom-2 -right-2 px-2 py-0.5 rounded-full bg-[#15803D] text-white text-[10px] font-bold flex items-center gap-1 shadow-sm">
-                          <CheckCircle className="w-3 h-3" />
-                          Terverifikasi Asli
-                        </div>
-                      )}
-                    </div>
+              {/* Hidden Inputs untuk File Picker dan Kamera Bawaan Device */}
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                onChange={handlePhotoUpload}
+                className="hidden"
+              />
+              <input
+                ref={cameraInputRef}
+                type="file"
+                accept="image/*"
+                capture="user"
+                onChange={handlePhotoUpload}
+                className="hidden"
+              />
 
-                    <label className="cursor-pointer text-xs text-[#BE3A50] font-semibold hover:underline">
-                      Ganti Foto Lain
-                      <input
-                        type="file"
-                        accept="image/*"
-                        onChange={handlePhotoUpload}
-                        className="hidden"
-                      />
-                    </label>
-                  </div>
-                ) : (
-                  <label className="flex flex-col items-center cursor-pointer text-center">
-                    <div className="w-14 h-14 rounded-2xl bg-[#BE3A50]/10 text-[#BE3A50] flex items-center justify-center mb-2">
-                      <Upload className="w-6 h-6" />
-                    </div>
-                    <span className="text-xs font-bold text-[#1F1A1B]">Klik untuk Unggah Foto Asli</span>
-                    <span className="text-[11px] text-[#6B6365] mt-0.5">Maksimal 5MB • JPG, PNG, WebP</span>
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={handlePhotoUpload}
-                      className="hidden"
+              {/* Tampilan Kamera Langsung (Webcam Stream) */}
+              {isLiveCameraActive ? (
+                <div className="flex flex-col items-center justify-center p-4 border-2 border-[#BE3A50] rounded-3xl bg-black text-white space-y-3">
+                  <div className="relative w-full max-w-xs aspect-square rounded-2xl overflow-hidden bg-gray-900 border-2 border-white/30">
+                    <video
+                      ref={videoRef}
+                      autoPlay
+                      playsInline
+                      muted
+                      className="w-full h-full object-cover scale-x-[-1]"
                     />
-                  </label>
-                )}
+                    <div className="absolute inset-0 border-2 border-dashed border-white/40 rounded-full m-8 pointer-events-none" />
+                  </div>
+                  <p className="text-[11px] text-gray-300">Posisikan wajah Anda di dalam lingkaran panduan</p>
+                  <div className="flex items-center gap-2 pt-1">
+                    <button
+                      type="button"
+                      onClick={captureLivePhoto}
+                      className="px-5 py-2.5 rounded-xl bg-[#BE3A50] hover:bg-[#a32f42] text-white text-xs font-bold transition-all flex items-center gap-2 shadow-lg"
+                    >
+                      <Camera className="w-4 h-4" />
+                      <span>Jepret Foto Sekarang</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={stopLiveCamera}
+                      className="px-4 py-2.5 rounded-xl bg-white/20 hover:bg-white/30 text-white text-xs font-medium transition-all"
+                    >
+                      Batal
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                /* Dropzone Drag & Drop dan Opsi Upload */
+                <div
+                  onDragOver={handleDragOver}
+                  onDragLeave={handleDragLeave}
+                  onDrop={handleDrop}
+                  className={`flex flex-col items-center justify-center p-6 border-2 border-dashed rounded-3xl transition-all ${
+                    isDragging
+                      ? 'border-[#BE3A50] bg-[#FBEBEE] scale-[1.01]'
+                      : 'border-[#E8E2D8] bg-[#FAF7F2]/50 hover:bg-[#FAF7F2]'
+                  }`}
+                >
+                  {photoUrl ? (
+                    <div className="flex flex-col items-center gap-3">
+                      <div className="relative">
+                        <img
+                          src={photoUrl}
+                          alt="Foto Profil"
+                          className="w-36 h-36 rounded-2xl object-cover border-2 border-[#15803D] shadow-md"
+                        />
+                        {isPhotoVerified && (
+                          <div className="absolute -bottom-2 -right-2 px-2 py-0.5 rounded-full bg-[#15803D] text-white text-[10px] font-bold flex items-center gap-1 shadow-sm">
+                            <CheckCircle className="w-3 h-3" />
+                            Terverifikasi Asli
+                          </div>
+                        )}
+                      </div>
 
-                {isProcessingPhoto && (
-                  <p className="text-xs text-[#BE3A50] font-medium mt-3 animate-pulse">
-                    Memvalidasi ukuran dan mendeteksi wajah asli...
-                  </p>
-                )}
+                      <div className="flex items-center gap-2 pt-1">
+                        <button
+                          type="button"
+                          onClick={startLiveCamera}
+                          className="px-3 py-1.5 rounded-xl bg-white border border-[#E8E2D8] text-xs font-semibold text-[#1F1A1B] hover:bg-[#FAF7F2] transition-all flex items-center gap-1.5"
+                        >
+                          <Camera className="w-3.5 h-3.5 text-[#BE3A50]" />
+                          <span>Foto Ulang (Kamera)</span>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => fileInputRef.current?.click()}
+                          className="px-3 py-1.5 rounded-xl bg-white border border-[#E8E2D8] text-xs font-semibold text-[#1F1A1B] hover:bg-[#FAF7F2] transition-all flex items-center gap-1.5"
+                        >
+                          <Upload className="w-3.5 h-3.5 text-[#6B6365]" />
+                          <span>Ganti Berkas</span>
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="flex flex-col items-center text-center space-y-3">
+                      <div className={`w-14 h-14 rounded-2xl flex items-center justify-center transition-all ${
+                        isDragging ? 'bg-[#BE3A50] text-white animate-bounce' : 'bg-[#BE3A50]/10 text-[#BE3A50]'
+                      }`}>
+                        <Upload className="w-6 h-6" />
+                      </div>
 
-                {photoError && (
-                  <p className="text-xs text-red-600 font-medium mt-3 text-center">
-                    {photoError}
-                  </p>
-                )}
-              </div>
+                      <div>
+                        <span className="text-xs font-bold text-[#1F1A1B] block">
+                          {isDragging ? 'Lepaskan Foto di Sini!' : 'Tarik & Lepas Foto di Sini (Drag & Drop)'}
+                        </span>
+                        <span className="text-[11px] text-[#6B6365] mt-0.5 block">
+                          Format JPG, PNG, atau WebP • Maksimal 5MB
+                        </span>
+                      </div>
+
+                      <div className="flex flex-wrap items-center justify-center gap-2 pt-2">
+                        <button
+                          type="button"
+                          onClick={startLiveCamera}
+                          className="px-4 py-2 rounded-xl bg-[#BE3A50] hover:bg-[#a32f42] text-white text-xs font-bold transition-all flex items-center gap-1.5 shadow-sm"
+                        >
+                          <Camera className="w-4 h-4" />
+                          <span>Ambil Foto Kamera Langsung</span>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => fileInputRef.current?.click()}
+                          className="px-4 py-2 rounded-xl bg-white hover:bg-[#FAF7F2] border border-[#E8E2D8] text-[#1F1A1B] text-xs font-semibold transition-all flex items-center gap-1.5 shadow-sm"
+                        >
+                          <Upload className="w-4 h-4 text-[#6B6365]" />
+                          <span>Pilih dari Berkas / Galeri</span>
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
+                  {isProcessingPhoto && (
+                    <p className="text-xs text-[#BE3A50] font-medium mt-3 animate-pulse">
+                      Memvalidasi ukuran dan mendeteksi wajah asli...
+                    </p>
+                  )}
+
+                  {photoError && (
+                    <p className="text-xs text-red-600 font-medium mt-3 text-center">
+                      {photoError}
+                    </p>
+                  )}
+                </div>
+              )}
             </div>
           )}
 
@@ -772,7 +952,7 @@ export default function OnboardingModal({
           ) : canClose ? (
             <button
               type="button"
-              onClick={onClose}
+              onClick={handleCloseModal}
               className="px-4 py-2 rounded-xl text-xs font-semibold text-[#6B6365] hover:bg-[#E8E2D8] transition-all"
             >
               Batal
