@@ -10,7 +10,7 @@ import { UserProfile } from '@/types';
 export function getGeminiApiKey(): string {
   if (typeof window !== 'undefined') {
     const savedKey = localStorage.getItem('cari_pacar_gemini_api_key');
-    if (savedKey) return savedKey;
+    if (savedKey && savedKey.trim().length > 0) return savedKey;
   }
   return process.env.NEXT_PUBLIC_GEMINI_API_KEY || '';
 }
