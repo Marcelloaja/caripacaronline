@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   User, MapPin, Calendar, Heart, Sparkles, ShieldCheck,
   Upload, CheckCircle, AlertCircle, HelpCircle, ArrowRight,
