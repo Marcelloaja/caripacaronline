@@ -8,6 +8,7 @@ import {
   Fingerprint, LogOut, CheckCircle2, Loader2, Mail
 } from 'lucide-react';
 import Navbar from '@/components/Navbar';
+import BottomNavigation from '@/components/BottomNavigation';
 import DiscoveryDeck from '@/components/DiscoveryDeck';
 import LikesReceivedView from '@/components/LikesReceivedView';
 import ChatAndVideoRoom from '@/components/ChatAndVideoRoom';
@@ -506,6 +507,16 @@ export default function Home() {
           )
         )}
       </main>
+
+      {/* ================= NAVIGATION BOTTOM (MOBILE) ================= */}
+      <BottomNavigation
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
+        likesCount={likesToMe.length}
+        unreadMessagesCount={matches.length}
+        currentUser={currentUser}
+        onOpenAuth={() => setShowAuthModal(true)}
+      />
 
       {/* ================= MODAL CELEBRATION (MATCHED!) ================= */}
       {matchedCelebrationUser && currentUser && (
